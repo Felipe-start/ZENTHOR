@@ -10,6 +10,41 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    // Workaround completo para NavigatorLockAcquireTimeoutError
+    (function() {
+      // Mock del NavigatorLocks
+      if (window.navigator && window.navigator.locks) {
+        // Reemplazar completamente el método request
+        window.navigator.locks.request = function() {
+          return Promise.resolve({
+            release: function() {}
+          });
+        };
+      }
+      
+      // Prevenir errores de indexedDB
+      if (window.indexedDB) {
+        const originalOpen = window.indexedDB.open;
+        window.indexedDB.open = function(name, version) {
+          if (name && name.includes('supabase')) {
+            // Retornar un objeto dummy para supabase
+            return {
+              onerror: null,
+              onsuccess: null,
+              onupgradeneeded: null,
+              result: null,
+              error: null,
+              addEventListener: function() {},
+              removeEventListener: function() {},
+              dispatchEvent: function() { return true; }
+            };
+          }
+          return originalOpen.call(this, name, version);
+        };
+      }
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

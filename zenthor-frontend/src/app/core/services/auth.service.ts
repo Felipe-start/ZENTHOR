@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from, throwError } from 'rxjs';
-import { tap, catchError, map } from 'rxjs/operators';
+import { tap, catchError } from 'rxjs/operators';
 import { SupabaseService, Usuario, AuthResponse } from './supabase.service';
 
 export interface LoginCredentials {
@@ -50,7 +50,8 @@ export class AuthService {
   }
 
   public get isAuthenticated(): boolean {
-    return !!localStorage.getItem('token') && !!this.currentUserValue;
+    const token = this.getToken();
+    return !!token && !!this.currentUserValue;
   }
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {

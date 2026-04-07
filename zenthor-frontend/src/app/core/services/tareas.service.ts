@@ -10,25 +10,37 @@ import { Tarea, TareaWithMateria } from '../models/tarea.model';
 export class TareasService {
   constructor(private apiService: ApiService) {}
 
-  getTareas(params?: { materia_id?: number; estado?: string }): Observable<TareaWithMateria[]> {
-    return this.apiService.get<Tarea[]>('/api/tareas', params).pipe(
-      map(tareas => tareas.map(tarea => ({
-        ...tarea,
-        materia_nombre: 'Cargando...',
-        materia_color: '#6c757d'
-      })))
-    );
-  }
+getTareas(params?: { materia_id?: number; estado?: string; prioridad?: string }): Observable<TareaWithMateria[]> {
+  return this.apiService.get<any>('/api/tareas', params).pipe(
+    map(response => {
+      // Si la respuesta tiene una propiedad 'data' que es un array
+      if (response && response.data && Array.isArray(response.data)) {
+        return response.data;
+      }
+      // Si la respuesta es directamente un array
+      if (Array.isArray(response)) {
+        return response;
+      }
+      // Si no, retornar array vacío
+      console.warn('Respuesta inesperada de tareas:', response);
+      return [];
+    })
+  );
+}
 
-  getTareasProximas(): Observable<TareaWithMateria[]> {
-    return this.apiService.get<Tarea[]>('/api/tareas/proximas').pipe(
-      map(tareas => tareas.map(tarea => ({
-        ...tarea,
-        materia_nombre: 'Cargando...',
-        materia_color: '#6c757d'
-      })))
-    );
-  }
+getTareasProximas(): Observable<TareaWithMateria[]> {
+  return this.apiService.get<any>('/api/tareas/proximas').pipe(
+    map(response => {
+      if (response && response.data && Array.isArray(response.data)) {
+        return response.data;
+      }
+      if (Array.isArray(response)) {
+        return response;
+      }
+      return [];
+    })
+  );
+}
 
   getTareaById(id: number): Observable<Tarea> {
     return this.apiService.get<Tarea>(`/api/tareas/${id}`);
