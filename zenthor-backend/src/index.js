@@ -6,9 +6,12 @@ require('dotenv').config();
 
 const materiasRoutes = require('./routes/materias.routes');
 const errorHandler = require('./middleware/errorHandler');
+const tareasRoutes = require('./routes/tareas.routes');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 
 // Middlewares globales
 app.use(helmet()); // Seguridad: headers HTTP
@@ -28,6 +31,8 @@ app.get('/health', (req, res) => {
 
 // Rutas de la API
 app.use('/api/materias', materiasRoutes);
+app.use('/api/tareas', tareasRoutes);
+
 
 // Ruta 404 para endpoints no encontrados
 app.use('*', (req, res) => {

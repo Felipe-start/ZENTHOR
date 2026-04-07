@@ -8,14 +8,14 @@ export interface Materia {
   activo: boolean;
   created_at: Date;
   updated_at: Date;
+  // Propiedades extendidas (no vienen de la BD directamente)
+  tareas_pendientes?: number;
+  total_tareas?: number;
+  proximo_examen?: Date;
 }
 
 export interface MateriaStats {
-  id: number;
-  nombre: string;
-  profesor: string;
-  color: string;
+  materia_id: number;
   tareas_pendientes: number;
-  total_tareas: number;
-  proximo_examen?: Date;
+  examenes_proximos: number;
 }
