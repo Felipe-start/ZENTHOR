@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -6,38 +6,38 @@ import { AuthService } from '../../../core/services/auth.service';
   template: `
     <nav class="navbar">
       <div class="navbar-brand">
-        <div class="logo-container">
-          <img src="assets/logo.svg" alt="Zenthor Logo" class="logo">
+        <div class="logo-container" routerLink="/dashboard">
+          <img src="assets/images/ LOGO Z.jpg" alt="ZENTHOR" class="logo-img" (error)="handleImageError($event)">
           <span class="brand-name">ZENTHOR</span>
         </div>
         <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
-          <i class="fas fa-bars"></i>
+          <i class="fas" [class.fa-bars]="!mobileMenuOpen" [class.fa-times]="mobileMenuOpen"></i>
         </button>
       </div>
       
       <div class="navbar-menu" [class.active]="mobileMenuOpen">
         <div class="navbar-start">
-          <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+          <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
             <i class="fas fa-chart-line"></i>
             <span>Dashboard</span>
           </a>
-          <a routerLink="/materias" routerLinkActive="active" class="nav-item">
+          <a routerLink="/materias" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
             <i class="fas fa-book"></i>
             <span>Materias</span>
           </a>
-          <a routerLink="/tareas" routerLinkActive="active" class="nav-item">
+          <a routerLink="/tareas" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
             <i class="fas fa-tasks"></i>
             <span>Tareas</span>
           </a>
-          <a routerLink="/examenes" routerLinkActive="active" class="nav-item">
+          <a routerLink="/examenes" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
             <i class="fas fa-calendar-alt"></i>
             <span>Exámenes</span>
           </a>
-          <a routerLink="/calendario" routerLinkActive="active" class="nav-item">
+          <a routerLink="/calendario" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
             <i class="fas fa-calendar-week"></i>
             <span>Calendario</span>
           </a>
-          <a routerLink="/configuracion" routerLinkActive="active" class="nav-item">
+          <a routerLink="/configuracion" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
             <i class="fas fa-cog"></i>
             <span>Configuración</span>
           </a>
@@ -49,11 +49,11 @@ import { AuthService } from '../../../core/services/auth.service';
               {{ getUserInitials() }}
             </div>
             <span class="user-name">{{ currentUser?.nombre_completo?.split(' ')[0] || 'Usuario' }}</span>
-            <i class="fas fa-chevron-down"></i>
+            <i class="fas fa-chevron-down" [class.rotated]="userMenuOpen"></i>
           </div>
           <div class="dropdown-menu" [class.show]="userMenuOpen">
             <a routerLink="/perfil" class="dropdown-item">
-              <i class="fas fa-user"></i>
+              <i class="fas fa-user-circle"></i>
               <span>Mi Perfil</span>
             </a>
             <div class="dropdown-divider"></div>
@@ -68,48 +68,59 @@ import { AuthService } from '../../../core/services/auth.service';
   `,
   styles: [`
     .navbar {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      padding: 0 24px;
+      background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #4c1d95 100%);
+      padding: 0 28px;
       height: 70px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
       position: sticky;
       top: 0;
       z-index: 1000;
     }
+    
     .navbar-brand {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 20px;
     }
+    
     .logo-container {
       display: flex;
       align-items: center;
       gap: 12px;
+      cursor: pointer;
     }
-    .logo {
-      height: 40px;
-      width: auto;
+    
+    .logo-img {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      object-fit: cover;
     }
+    
     .brand-name {
       font-size: 24px;
       font-weight: 800;
-      background: linear-gradient(135deg, #fff 0%, #a0a0ff 100%);
+      background: linear-gradient(135deg, #fff 0%, #c4b5fd 50%, #a78bfa 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: 1px;
     }
+    
     .mobile-menu-btn {
       display: none;
-      background: none;
+      background: rgba(255, 255, 255, 0.1);
       border: none;
       color: white;
-      font-size: 24px;
+      font-size: 20px;
       cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
     }
+    
     .navbar-menu {
       display: flex;
       align-items: center;
@@ -117,47 +128,52 @@ import { AuthService } from '../../../core/services/auth.service';
       flex: 1;
       margin-left: 48px;
     }
+    
     .navbar-start {
       display: flex;
       gap: 8px;
     }
+    
     .nav-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 16px;
-      color: rgba(255,255,255,0.7);
+      padding: 8px 18px;
+      color: rgba(255, 255, 255, 0.8);
       text-decoration: none;
-      border-radius: 8px;
+      border-radius: 12px;
       transition: all 0.3s ease;
       font-weight: 500;
     }
-    .nav-item i {
-      font-size: 18px;
-    }
-    .nav-item:hover, .nav-item.active {
-      background: rgba(255,255,255,0.1);
+    
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.15);
       color: white;
     }
+    
+    .nav-item.active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+    
     .navbar-end {
       position: relative;
     }
+    
     .user-menu {
       display: flex;
       align-items: center;
       gap: 12px;
       cursor: pointer;
-      padding: 8px 12px;
+      padding: 8px 16px;
       border-radius: 40px;
-      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.05);
     }
-    .user-menu:hover {
-      background: rgba(255,255,255,0.1);
-    }
+    
     .user-avatar {
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -165,90 +181,118 @@ import { AuthService } from '../../../core/services/auth.service';
       color: white;
       font-weight: 600;
     }
+    
     .user-name {
       color: white;
       font-weight: 500;
     }
+    
     .dropdown-menu {
       position: absolute;
       top: 100%;
       right: 0;
       background: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-      min-width: 200px;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      min-width: 220px;
       opacity: 0;
       visibility: hidden;
       transform: translateY(-10px);
       transition: all 0.3s ease;
       z-index: 1000;
     }
+    
     .dropdown-menu.show {
       opacity: 1;
       visibility: visible;
       transform: translateY(10px);
     }
+    
     .dropdown-item {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 12px 20px;
-      color: #333;
+      color: #374151;
       text-decoration: none;
-      transition: background 0.3s ease;
       width: 100%;
       background: none;
       border: none;
       cursor: pointer;
     }
+    
     .dropdown-item:hover {
-      background: #f5f5f5;
+      background: #f3f4f6;
+      color: #6366f1;
     }
-    .dropdown-divider {
-      height: 1px;
-      background: #e0e0e0;
-      margin: 8px 0;
-    }
+    
     .logout {
-      color: #dc3545;
+      color: #ef4444;
     }
+    
+    @media (max-width: 1024px) {
+      .nav-item span {
+        font-size: 13px;
+      }
+      .user-name {
+        display: none;
+      }
+    }
+    
     @media (max-width: 768px) {
       .navbar {
         padding: 0 16px;
       }
+      
+      .logo-img {
+        width: 35px;
+        height: 35px;
+      }
+      
+      .brand-name {
+        font-size: 20px;
+      }
+      
       .mobile-menu-btn {
         display: block;
       }
+      
       .navbar-menu {
         position: fixed;
         top: 70px;
         left: -100%;
         width: 100%;
         height: calc(100vh - 70px);
-        background: #1a1a2e;
+        background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 100%);
         flex-direction: column;
-        justify-content: flex-start;
         margin-left: 0;
         transition: left 0.3s ease;
-        overflow-y: auto;
         padding: 20px;
+        z-index: 999;
       }
+      
       .navbar-menu.active {
         left: 0;
       }
+      
       .navbar-start {
         flex-direction: column;
         width: 100%;
       }
+      
       .nav-item {
-        padding: 12px 16px;
+        padding: 14px 16px;
+        width: 100%;
       }
+      
       .navbar-end {
         width: 100%;
         margin-top: 20px;
       }
+      
       .user-menu {
         justify-content: center;
+        width: 100%;
       }
     }
   `]
@@ -266,6 +310,10 @@ export class NavbarComponent implements OnInit {
     });
   }
 
+  handleImageError(event: any) {
+    event.target.src = 'https://via.placeholder.com/45x45?text=Z';
+  }
+
   getUserInitials(): string {
     if (this.currentUser?.nombre_completo) {
       return this.currentUser.nombre_completo
@@ -280,6 +328,16 @@ export class NavbarComponent implements OnInit {
 
   toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
+    if (this.mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen = false;
+    document.body.style.overflow = '';
   }
 
   toggleUserMenu() {
@@ -287,6 +345,7 @@ export class NavbarComponent implements OnInit {
   }
 
   logout() {
+    this.closeMobileMenu();
     this.authService.logout();
   }
 }

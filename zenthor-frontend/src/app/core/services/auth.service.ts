@@ -91,6 +91,20 @@ export class AuthService {
     );
   }
 
+async resetPassword(email: string): Promise<{ success: boolean; message: string }> {
+  return this.supabaseService.resetPassword(email);
+}
+
+  // 🔐 NUEVO: Actualizar contraseña
+  async updatePassword(newPassword: string): Promise<{ success: boolean; message: string }> {
+    const result = await this.supabaseService.updatePassword(newPassword);
+    if (result.success) {
+      // Opcional: cerrar sesión para que el usuario inicie con la nueva contraseña
+      this.logout();
+    }
+    return result;
+  }
+
   logout(): void {
     this.supabaseService.logout().catch(console.error);
     localStorage.removeItem('token');

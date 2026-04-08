@@ -1,445 +1,200 @@
-import { Component, OnInit } from '@angular/core';
-import { Chart } from 'chart.js/auto';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { Chart, ChartConfiguration, ChartItem } from 'chart.js/auto';
 import { TareasService } from '../../../core/services/tareas.service';
 import { ExamenesService } from '../../../core/services/examenes.service';
 import { MateriasService } from '../../../core/services/materias.service';
 import { TareaWithMateria } from '../../../core/models/tarea.model';
 import { ExamenWithMateria } from '../../../core/models/examen.model';
 import { Materia } from '../../../core/models/materia.model';
+import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
-  template: `
-    <div class="dashboard">
-      <!-- Hero Section -->
-      <div class="hero-section">
-        <div class="hero-content">
-          <h1>Bienvenido de vuelta, {{ userName }}</h1>
-          <p>Organiza tu vida académica y alcanza tus metas con ZENTHOR</p>
-        </div>
-      </div>
-
-      <!-- Stats Cards -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-tasks"></i>
-          </div>
-          <div class="stat-info">
-            <h3>{{ tareasPendientes }}</h3>
-            <p>Tareas Pendientes</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-calendar-alt"></i>
-          </div>
-          <div class="stat-info">
-            <h3>{{ examenesProximosCount }}</h3>
-            <p>Exámenes Próximos</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-book"></i>
-          </div>
-          <div class="stat-info">
-            <h3>{{ materiasActivas }}</h3>
-            <p>Materias Activas</p>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <div class="stat-info">
-            <h3>{{ tareasCompletadas }}</h3>
-            <p>Tareas Completadas</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="dashboard-grid">
-        <!-- Tareas Próximas -->
-        <div class="card">
-          <div class="card-header">
-            <h3>Tareas Próximas</h3>
-            <a routerLink="/tareas" class="view-all">Ver todas <i class="fas fa-arrow-right"></i></a>
-          </div>
-          <div class="card-body">
-            <div *ngIf="tareasProximas.length === 0" class="empty-state">
-              <i class="fas fa-check-circle"></i>
-              <p>¡No tienes tareas pendientes!</p>
-            </div>
-            <div *ngFor="let tarea of tareasProximas" class="task-item">
-              <div class="task-info">
-                <div class="task-title">
-                  <span class="task-dot" [style.backgroundColor]="tarea.materia_color"></span>
-                  <strong>{{ tarea.titulo }}</strong>
-                </div>
-                <div class="task-meta">
-                  <span>{{ tarea.materia_nombre }}</span>
-                  <span class="task-date">
-                    <i class="far fa-calendar"></i>
-                    {{ tarea.fecha_entrega | date:'dd/MM/yyyy' }}
-                  </span>
-                </div>
-              </div>
-              <button class="complete-btn" (click)="completarTarea(tarea.id)">
-                <i class="fas fa-check"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Exámenes Próximos -->
-        <div class="card">
-          <div class="card-header">
-            <h3>Próximos Exámenes</h3>
-            <a routerLink="/examenes" class="view-all">Ver todas <i class="fas fa-arrow-right"></i></a>
-          </div>
-          <div class="card-body">
-            <div *ngIf="examenesProximosList.length === 0" class="empty-state">
-              <i class="fas fa-smile"></i>
-              <p>¡No hay exámenes próximos!</p>
-            </div>
-            <div *ngFor="let examen of examenesProximosList" class="exam-item">
-              <div class="exam-info">
-                <div class="exam-title">
-                  <span class="exam-dot" [style.backgroundColor]="examen.materia_color"></span>
-                  <strong>{{ examen.materia_nombre }}</strong>
-                </div>
-                <div class="exam-meta">
-                  <span>{{ examen.aula ? 'Aula ' + examen.aula : 'Sin aula asignada' }}</span>
-                  <span class="exam-date">
-                    <i class="far fa-clock"></i>
-                    {{ examen.fecha_examen | date:'dd/MM/yyyy' }}
-                  </span>
-                </div>
-              </div>
-              <button class="details-btn" (click)="verDetallesExamen(examen)">
-                <i class="fas fa-info-circle"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Gráfico de Progreso -->
-        <div class="card chart-card">
-          <div class="card-header">
-            <h3>Progreso Académico</h3>
-            <span class="chart-subtitle">Últimos 7 días</span>
-          </div>
-          <div class="card-body">
-            <canvas id="progressChart"></canvas>
-          </div>
-        </div>
-
-        <!-- Materias con tareas pendientes -->
-        <div class="card">
-          <div class="card-header">
-            <h3>Materias con tareas pendientes</h3>
-            <a routerLink="/materias" class="view-all">Gestionar <i class="fas fa-arrow-right"></i></a>
-          </div>
-          <div class="card-body">
-            <div *ngIf="materiasConTareas.length === 0" class="empty-state">
-              <i class="fas fa-trophy"></i>
-              <p>¡Todas tus materias están al día!</p>
-            </div>
-            <div *ngFor="let materia of materiasConTareas" class="subject-item">
-              <div class="subject-info">
-                <span class="subject-color" [style.backgroundColor]="materia.color"></span>
-                <div class="subject-details">
-                  <strong>{{ materia.nombre }}</strong>
-                  <span>{{ materia.profesor }}</span>
-                </div>
-              </div>
-              <div class="task-count">
-                <span class="badge">{{ materia.tareas_pendientes }} tarea(s)</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .dashboard {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    .hero-section {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 24px;
-      padding: 32px 40px;
-      margin-bottom: 32px;
-      color: white;
-    }
-    .hero-content h1 {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .hero-content p {
-      opacity: 0.9;
-      margin: 0;
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 24px;
-      margin-bottom: 32px;
-    }
-    .stat-card {
-      background: white;
-      border-radius: 20px;
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .stat-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-    .stat-icon {
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 28px;
-    }
-    .stat-info h3 {
-      font-size: 32px;
-      font-weight: 700;
-      margin: 0;
-      color: #2c3e50;
-    }
-    .stat-info p {
-      margin: 4px 0 0;
-      color: #7f8c8d;
-      font-size: 14px;
-    }
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
-    }
-    .card {
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      overflow: hidden;
-    }
-    .card-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid #eef2f6;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .card-header h3 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: #2c3e50;
-    }
-    .view-all {
-      color: #667eea;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-    }
-    .card-body {
-      padding: 20px 24px;
-    }
-    .task-item, .exam-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 0;
-      border-bottom: 1px solid #eef2f6;
-    }
-    .task-item:last-child, .exam-item:last-child {
-      border-bottom: none;
-    }
-    .task-info, .exam-info {
-      flex: 1;
-    }
-    .task-title, .exam-title {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-    .task-dot, .exam-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    .task-meta, .exam-meta {
-      display: flex;
-      gap: 16px;
-      font-size: 12px;
-      color: #7f8c8d;
-      margin-left: 22px;
-    }
-    .task-date, .exam-date {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .complete-btn, .details-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    .complete-btn {
-      background: #e8f5e9;
-      color: #4caf50;
-    }
-    .complete-btn:hover {
-      background: #4caf50;
-      color: white;
-    }
-    .details-btn {
-      background: #e3f2fd;
-      color: #2196f3;
-    }
-    .details-btn:hover {
-      background: #2196f3;
-      color: white;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: #95a5a6;
-    }
-    .empty-state i {
-      font-size: 48px;
-      margin-bottom: 16px;
-    }
-    .subject-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-    }
-    .subject-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .subject-color {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
-    .subject-details {
-      display: flex;
-      flex-direction: column;
-    }
-    .subject-details span {
-      font-size: 12px;
-      color: #7f8c8d;
-    }
-    .badge {
-      background: #ff9800;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    .chart-card {
-      grid-column: span 2;
-    }
-    @media (max-width: 768px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
-      .chart-card {
-        grid-column: span 1;
-      }
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  `]
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
+  // Datos del usuario
   userName: string = '';
+  
+  // Estadísticas
   tareasPendientes: number = 0;
   examenesProximosCount: number = 0;
   materiasActivas: number = 0;
   tareasCompletadas: number = 0;
+  progresoAcademico: number = 0;
+  
+  // Listas de datos
   tareasProximas: TareaWithMateria[] = [];
   examenesProximosList: ExamenWithMateria[] = [];
   materiasConTareas: any[] = [];
-
+  todasMaterias: Materia[] = [];
+  
+  // Estados de carga
+  cargandoTareas: boolean = true;
+  cargandoExamenes: boolean = true;
+  cargandoMaterias: boolean = true;
+  cargandoEstadisticas: boolean = true;
+  
+  // Gráfico
   private chart: Chart | null = null;
+  
+  // Frases motivacionales
+  frasesMotivacionales: string[] = [
+    "¡Sigue así! Estás avanzando hacia tus metas 🚀",
+    "Cada tarea completada es un paso más hacia el éxito 📚",
+    "La constancia es la clave del éxito académico 💪",
+    "¡Excelente trabajo! Mantén el ritmo ✨",
+    "Tu esfuerzo de hoy es el éxito de mañana 🌟"
+  ];
+  fraseMotivacional: string = "";
 
   constructor(
     private tareasService: TareasService,
     private examenesService: ExamenesService,
-    private materiasService: MateriasService
+    private materiasService: MateriasService,
+    private toastr: ToastrService,
+    private router: Router
   ) {}
 
-  ngOnInit() {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      const user = JSON.parse(userStr);
-      this.userName = user.nombre_completo?.split(' ')[0] || 'Usuario';
-    }
-
+  ngOnInit(): void {
+    this.obtenerNombreUsuario();
+    this.seleccionarFraseMotivacional();
     this.cargarDatos();
   }
 
-  cargarDatos() {
+  ngAfterViewInit(): void {
+    // Pequeño delay para asegurar que el DOM está listo
+    setTimeout(() => {
+      this.inicializarGrafico();
+    }, 1000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.chart) {
+      this.chart.destroy();
+    }
+  }
+
+  seleccionarFraseMotivacional(): void {
+    const randomIndex = Math.floor(Math.random() * this.frasesMotivacionales.length);
+    this.fraseMotivacional = this.frasesMotivacionales[randomIndex];
+  }
+
+  obtenerNombreUsuario(): void {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        this.userName = user.nombre_completo?.split(' ')[0] || 'Usuario';
+      } catch (e) {
+        this.userName = 'Usuario';
+      }
+    }
+  }
+
+  cargarDatos(): void {
+    this.cargarTareasProximas();
+    this.cargarExamenesProximos();
+    this.cargarMaterias();
+    this.cargarEstadisticasCompletas();
+  }
+
+  cargarTareasProximas(): void {
+    this.cargandoTareas = true;
     this.tareasService.getTareasProximas().subscribe({
       next: (tareas: TareaWithMateria[]) => {
         this.tareasProximas = tareas.slice(0, 5);
-        this.tareasPendientes = tareas.length;
-        this.tareasCompletadas = Math.floor(Math.random() * 50);
+        this.cargandoTareas = false;
       },
-      error: (error: any) => console.error('Error cargando tareas:', error)
+      error: (error: any) => {
+        console.error('Error cargando tareas próximas:', error);
+        this.toastr.error('Error al cargar las tareas próximas', 'Error');
+        this.cargandoTareas = false;
+      }
     });
+  }
 
+  cargarExamenesProximos(): void {
+    this.cargandoExamenes = true;
     this.examenesService.getExamenesProximos().subscribe({
       next: (examenes: ExamenWithMateria[]) => {
         this.examenesProximosList = examenes.slice(0, 5);
         this.examenesProximosCount = examenes.length;
+        this.cargandoExamenes = false;
       },
-      error: (error: any) => console.error('Error cargando exámenes:', error)
+      error: (error: any) => {
+        console.error('Error cargando exámenes próximos:', error);
+        this.toastr.error('Error al cargar los exámenes próximos', 'Error');
+        this.cargandoExamenes = false;
+      }
     });
-
-    this.materiasService.getMateriasActivas().subscribe({
-      next: (materias: Materia[]) => {
-        this.materiasActivas = materias.length;
-        this.materiasConTareas = materias.map((m: Materia) => ({
-          ...m,
-          tareas_pendientes: Math.floor(Math.random() * 5)
-        })).filter((m: any) => m.tareas_pendientes > 0);
-      },
-      error: (error: any) => console.error('Error cargando materias:', error)
-    });
-
-    setTimeout(() => {
-      this.inicializarGrafico();
-    }, 500);
   }
 
-  inicializarGrafico() {
+  cargarMaterias(): void {
+    this.cargandoMaterias = true;
+    this.materiasService.getMateriasActivas().subscribe({
+      next: (materias: Materia[]) => {
+        this.todasMaterias = materias;
+        this.materiasActivas = materias.length;
+        this.cargarTareasPorMateria(materias);
+        this.cargandoMaterias = false;
+      },
+      error: (error: any) => {
+        console.error('Error cargando materias:', error);
+        this.toastr.error('Error al cargar las materias', 'Error');
+        this.cargandoMaterias = false;
+      }
+    });
+  }
+
+  cargarTareasPorMateria(materias: Materia[]): void {
+    this.tareasService.getTareas({ estado: 'pendiente' }).subscribe({
+      next: (tareas: TareaWithMateria[]) => {
+        const tareasPorMateria = new Map<number, number>();
+        tareas.forEach(tarea => {
+          const count = tareasPorMateria.get(tarea.materia_id) || 0;
+          tareasPorMateria.set(tarea.materia_id, count + 1);
+        });
+
+        this.materiasConTareas = materias
+          .map(materia => ({
+            ...materia,
+            tareas_pendientes: tareasPorMateria.get(materia.id) || 0
+          }))
+          .filter(materia => materia.tareas_pendientes > 0)
+          .sort((a, b) => b.tareas_pendientes - a.tareas_pendientes);
+      },
+      error: (error: any) => {
+        console.error('Error cargando tareas por materia:', error);
+      }
+    });
+  }
+
+  cargarEstadisticasCompletas(): void {
+    this.cargandoEstadisticas = true;
+    this.tareasService.getTareas().subscribe({
+      next: (tareas: TareaWithMateria[]) => {
+        this.tareasPendientes = tareas.filter(t => t.estado === 'pendiente').length;
+        this.tareasCompletadas = tareas.filter(t => t.estado === 'completada').length;
+        
+        // Calcular progreso académico (basado en tareas completadas vs total)
+        const totalTareas = this.tareasPendientes + this.tareasCompletadas;
+        this.progresoAcademico = totalTareas > 0 
+          ? Math.round((this.tareasCompletadas / totalTareas) * 100) 
+          : 0;
+        
+        this.cargandoEstadisticas = false;
+      },
+      error: (error: any) => {
+        console.error('Error cargando estadísticas:', error);
+        this.cargandoEstadisticas = false;
+      }
+    });
+  }
+
+  inicializarGrafico(): void {
     const canvas = document.getElementById('progressChart') as HTMLCanvasElement;
     if (!canvas) return;
 
@@ -447,53 +202,253 @@ export class DashboardComponent implements OnInit {
       this.chart.destroy();
     }
 
-    this.chart = new Chart(canvas, {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Datos para el gráfico (simulados pero basados en datos reales cuando estén disponibles)
+    const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    const tareasCompletadasData = [4, 6, 8, 7, 10, 5, 3];
+    const horasEstudioData = [2.5, 3, 3.5, 4, 5, 3.5, 2];
+    const productividadData = [68, 72, 78, 75, 85, 65, 58];
+
+    const config: ChartConfiguration = {
       type: 'line',
       data: {
-        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+        labels: dias,
         datasets: [
           {
-            label: 'Tareas completadas',
-            data: [4, 7, 5, 8, 12, 6, 9],
-            borderColor: '#667eea',
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            label: '📝 Tareas completadas',
+            data: tareasCompletadasData,
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.08)',
+            borderWidth: 3,
             tension: 0.4,
-            fill: true
+            fill: true,
+            pointBackgroundColor: '#6366f1',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            pointStyle: 'circle'
           },
           {
-            label: 'Horas de estudio',
-            data: [2, 3, 2.5, 4, 5, 3, 2],
-            borderColor: '#48bb78',
-            backgroundColor: 'rgba(72, 187, 120, 0.1)',
+            label: '📚 Horas de estudio',
+            data: horasEstudioData,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.08)',
+            borderWidth: 3,
             tension: 0.4,
-            fill: true
+            fill: true,
+            pointBackgroundColor: '#10b981',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            pointStyle: 'circle'
+          },
+          {
+            label: '🎯 Productividad (%)',
+            data: productividadData,
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.08)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#f59e0b',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 8,
+            pointStyle: 'circle',
+            yAxisID: 'y1'
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: true,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
         plugins: {
           legend: {
             position: 'top',
+            labels: {
+              usePointStyle: true,
+              boxWidth: 10,
+              padding: 15,
+              font: {
+                family: "'Inter', sans-serif",
+                size: 11,
+                weight: '500'
+              }
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            titleColor: '#ffffff',
+            bodyColor: '#e5e7eb',
+            padding: 12,
+            cornerRadius: 8,
+            displayColors: true,
+            callbacks: {
+              label: function(context: any) {
+                let label = context.dataset.label || '';
+                let value = context.parsed.y;
+                if (context.dataset.label?.includes('Productividad')) {
+                  return `${label}: ${value}%`;
+                }
+                if (context.dataset.label?.includes('Horas')) {
+                  return `${label}: ${value} hrs`;
+                }
+                return `${label}: ${value}`;
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#f3f4f6'
+            },
+            title: {
+              display: true,
+              text: 'Tareas / Horas',
+              color: '#6b7280',
+              font: {
+                size: 11,
+                weight: '500'
+              }
+            }
+          },
+          y1: {
+            position: 'right',
+            beginAtZero: true,
+            max: 100,
+            grid: {
+              drawOnChartArea: false
+            },
+            title: {
+              display: true,
+              text: 'Productividad (%)',
+              color: '#6b7280',
+              font: {
+                size: 11,
+                weight: '500'
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              font: {
+                size: 11,
+                weight: '500'
+              }
+            }
           }
         }
+      }
+    };
+
+    this.chart = new Chart(ctx, config);
+  }
+
+  getPrioridadTexto(prioridad: string): string {
+    const prioridades: { [key: string]: string } = {
+      baja: 'Baja',
+      media: 'Media',
+      alta: 'Alta'
+    };
+    return prioridades[prioridad] || prioridad;
+  }
+
+  getColorPrioridad(prioridad: string): string {
+    const colores: { [key: string]: string } = {
+      baja: '#10b981',
+      media: '#f59e0b',
+      alta: '#ef4444'
+    };
+    return colores[prioridad] || '#6b7280';
+  }
+
+  completarTarea(id: number): void {
+    this.tareasService.completarTarea(id).subscribe({
+      next: () => {
+        const tareaCompletada = this.tareasProximas.find(t => t.id === id);
+        this.tareasProximas = this.tareasProximas.filter(t => t.id !== id);
+        this.tareasPendientes--;
+        this.tareasCompletadas++;
+        
+        // Recalcular progreso
+        const totalTareas = this.tareasPendientes + this.tareasCompletadas;
+        this.progresoAcademico = totalTareas > 0 
+          ? Math.round((this.tareasCompletadas / totalTareas) * 100) 
+          : 0;
+        
+        this.toastr.success('¡Tarea completada! 🎉 Sigue así', 'Éxito');
+        
+        if (tareaCompletada) {
+          this.actualizarMateriaTareas(tareaCompletada.materia_id);
+        }
+      },
+      error: (error: any) => {
+        console.error('Error completando tarea:', error);
+        this.toastr.error('Error al completar la tarea', 'Error');
       }
     });
   }
 
-  completarTarea(id: number) {
-    this.tareasService.completarTarea(id).subscribe({
-      next: () => {
-        this.tareasProximas = this.tareasProximas.filter((t: TareaWithMateria) => t.id !== id);
-        this.tareasPendientes--;
-        this.tareasCompletadas++;
-      },
-      error: (error: any) => console.error('Error completando tarea:', error)
-    });
+  actualizarMateriaTareas(materiaId: number): void {
+    const materia = this.materiasConTareas.find(m => m.id === materiaId);
+    if (materia) {
+      materia.tareas_pendientes--;
+      if (materia.tareas_pendientes === 0) {
+        this.materiasConTareas = this.materiasConTareas.filter(m => m.id !== materiaId);
+      }
+    }
   }
 
-  verDetallesExamen(examen: ExamenWithMateria) {
-    alert(`Examen de ${examen.materia_nombre}\nFecha: ${new Date(examen.fecha_examen).toLocaleDateString()}\nAula: ${examen.aula || 'No especificada'}\nTemas: ${examen.temas || 'No especificados'}`);
+  verDetallesExamen(examen: ExamenWithMateria): void {
+    const fechaFormateada = new Date(examen.fecha_examen).toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    
+    this.toastr.info(
+      `<div style="text-align: left;">
+        <strong>📚 ${examen.materia_nombre}</strong><br/>
+        📅 Fecha: ${fechaFormateada}<br/>
+        📍 Aula: ${examen.aula || 'No especificada'}<br/>
+        📖 Temas: ${examen.temas || 'No especificados'}
+      </div>`,
+      'Detalles del Examen',
+      { 
+        timeOut: 8000, 
+        enableHtml: true,
+        positionClass: 'toast-top-right'
+      }
+    );
+  }
+
+  irATareas(): void {
+    this.router.navigate(['/tareas']);
+  }
+
+  irAExamenes(): void {
+    this.router.navigate(['/examenes']);
+  }
+
+  irAMaterias(): void {
+    this.router.navigate(['/materias']);
+  }
+
+  handleImageError(event: any): void {
+    event.target.src = 'https://via.placeholder.com/80x80?text=Z';
   }
 }
