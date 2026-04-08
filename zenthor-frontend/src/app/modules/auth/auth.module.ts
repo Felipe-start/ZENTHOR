@@ -3,16 +3,25 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthRoutingModule } from './auth-routing.module';
+
+// Componentes
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
+import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './reset-password/reset-password.component';
 
 @NgModule({
-  declarations: [LoginComponent, RegisterComponent],
+  declarations: [
+    LoginComponent,
+    RegisterComponent,
+    ForgotPasswordComponent,
+    ResetPasswordComponent
+  ],
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule,  // ← Este es el que faltaba
-    RouterModule,
+    ReactiveFormsModule,
+    RouterModule, // ← IMPORTANTE: Agregar RouterModule
     AuthRoutingModule
   ]
 })

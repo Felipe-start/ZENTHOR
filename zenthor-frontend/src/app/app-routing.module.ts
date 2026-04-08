@@ -3,57 +3,55 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 
 const routes: Routes = [
-  {
-    path: '',
-    redirectTo: '/dashboard',
-    pathMatch: 'full'
-  },
-  {
-    path: 'login',
+  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
+  { 
+    path: 'auth', 
     loadChildren: () => import('./modules/auth/auth.module').then(m => m.AuthModule)
   },
-  {
-    path: 'register',
-    loadChildren: () => import('./modules/auth/auth.module').then(m => m.AuthModule)
-  },
-  {
-    path: 'dashboard',
+  { 
+    path: 'dashboard', 
     loadChildren: () => import('./modules/dashboard/dashboard.module').then(m => m.DashboardModule),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard] 
   },
-  {
-    path: 'materias',
+  { 
+    path: 'materias', 
     loadChildren: () => import('./modules/materias/materias.module').then(m => m.MateriasModule),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard] 
   },
-  {
-    path: 'tareas',
+  { 
+    path: 'tareas', 
     loadChildren: () => import('./modules/tareas/tareas.module').then(m => m.TareasModule),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard] 
   },
-  {
-    path: 'examenes',
+  { 
+    path: 'examenes', 
     loadChildren: () => import('./modules/examenes/examenes.module').then(m => m.ExamenesModule),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard] 
   },
-  {
-    path: 'calendario',
+  { 
+    path: 'calendario', 
     loadChildren: () => import('./modules/calendario/calendario.module').then(m => m.CalendarioModule),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard] 
   },
-  {
-    path: 'configuracion',
+  { 
+    path: 'configuracion', 
     loadChildren: () => import('./modules/configuracion/configuracion.module').then(m => m.ConfiguracionModule),
-    canActivate: [AuthGuard]
+    canActivate: [AuthGuard] 
   },
-  {
-    path: '**',
-    redirectTo: '/dashboard'
-  }
+  // Redirigir rutas antiguas a las nuevas
+  { path: 'login', redirectTo: '/auth/login', pathMatch: 'full' },
+  { path: 'register', redirectTo: '/auth/register', pathMatch: 'full' },
+  { path: 'forgot-password', redirectTo: '/auth/forgot-password', pathMatch: 'full' },
+  { path: 'reset-password', redirectTo: '/auth/reset-password', pathMatch: 'full' },
+  { path: '**', redirectTo: '/dashboard' }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {
+    useHash: false,
+    enableTracing: false,
+    scrollPositionRestoration: 'enabled'
+  })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

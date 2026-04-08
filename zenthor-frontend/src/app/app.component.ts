@@ -1,51 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
-  template: `
-    <div class="app-container">
-      <app-navbar *ngIf="authService.isAuthenticated"></app-navbar>
-      <div class="main-wrapper" [class.with-sidebar]="authService.isAuthenticated">
-        <app-sidebar *ngIf="authService.isAuthenticated"></app-sidebar>
-        <div class="content-area">
-          <router-outlet></router-outlet>
-        </div>
-      </div>
-      <app-footer *ngIf="authService.isAuthenticated"></app-footer>
-    </div>
-  `,
-  styles: [`
-    .app-container {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    .main-wrapper {
-      display: flex;
-      flex: 1;
-    }
-    .main-wrapper.with-sidebar {
-      margin-left: 280px;
-    }
-    .content-area {
-      flex: 1;
-      padding: 24px;
-      background: #f8f9fa;
-    }
-    @media (max-width: 768px) {
-      .main-wrapper.with-sidebar {
-        margin-left: 0;
-      }
-      .content-area {
-        padding: 16px;
-      }
-    }
-  `]
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'Zenthor - Organiza tu vida académica';
+  isSidebarCollapsed = false;
+  private sidebarEventListener: ((event: CustomEvent) => void) | null = null;
 
   constructor(public authService: AuthService, private router: Router) {
     this.router.events.subscribe(event => {
@@ -53,5 +18,25 @@ export class AppComponent {
         window.scrollTo(0, 0);
       }
     });
+  }
+
+  ngOnInit() {
+    // Cargar estado del sidebar desde localStorage
+    const savedState = localStorage.getItem('sidebarCollapsed');
+    this.isSidebarCollapsed = savedState === 'true';
+    
+    // Escuchar cambios del sidebar
+    this.sidebarEventListener = ((event: Event) => {
+      const customEvent = event as CustomEvent;
+      this.isSidebarCollapsed = customEvent.detail.collapsed;
+    }) as EventListener;
+    
+    window.addEventListener('sidebarToggle', this.sidebarEventListener as EventListener);
+  }
+
+  ngOnDestroy() {
+    if (this.sidebarEventListener) {
+      window.removeEventListener('sidebarToggle', this.sidebarEventListener as EventListener);
+    }
   }
 }

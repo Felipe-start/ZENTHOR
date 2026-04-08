@@ -1,0 +1,611 @@
+/* ============================================
+   LOGIN/REGISTER STYLES - ZENTHOR
+   Premium Design with Perfect Logo Display
+   ============================================ */
+
+/* Contenedor principal con gradiente elegante */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efecto de fondo decorativo */
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 500px;
+  height: 500px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  animation: floatBg 8s ease-in-out infinite;
+}
+
+.auth-container::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  animation: floatBg 10s ease-in-out infinite reverse;
+}
+
+@keyframes floatBg {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+/* Tarjeta de autenticación */
+.auth-card {
+  background: white;
+  border-radius: 32px;
+  padding: 48px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 1;
+  animation: scaleIn 0.5s ease forwards;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ============================================
+   HEADER CON LOGO - VERSIÓN PERFECCIONADA
+   ============================================ */
+.auth-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+/* Contenedor del logo para mejor control */
+.logo-container {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+/* Logo - Tamaño óptimo para verse completo y nítido */
+.logo {
+  width: 400px;
+  height: 110px;
+  border-radius: 20px;
+  object-fit: cover;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  animation: float 3s ease-in-out infinite;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 12px 25px rgba(0, 0, 0, 0.2));
+}
+
+/* Animación de flotación suave */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Efecto de brillo sutil detrás del logo */
+.logo-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 110px;
+  height: 110px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.logo-container:hover::after {
+  opacity: 1;
+}
+
+/* Título */
+.auth-header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+}
+
+.auth-header p {
+  color: #7f8c8d;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* ============================================
+   FORMULARIO
+   ============================================ */
+.auth-form {
+  margin-top: 8px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+/* Input group con ícono */
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-group i:first-child {
+  position: absolute;
+  left: 16px;
+  color: #95a5a6;
+  z-index: 1;
+  font-size: 16px;
+  transition: color 0.2s ease;
+}
+
+.input-group input,
+.input-group select {
+  width: 100%;
+  padding: 14px 16px 14px 48px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  background: white;
+  color: #2c3e50;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-group input.is-invalid,
+.input-group select.is-invalid {
+  border-color: #e74c3c;
+}
+
+.input-group input.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+/* Botón toggle password */
+.toggle-password {
+  position: absolute;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #95a5a6;
+  transition: color 0.2s;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password:hover {
+  color: #667eea;
+}
+
+/* Mensajes de error */
+.invalid-feedback {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.invalid-feedback i {
+  font-size: 12px;
+}
+
+/* Password Strength */
+.password-strength {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.strength-bar {
+  height: 4px;
+  width: 100px;
+  border-radius: 4px;
+  background: #e0e0e0;
+  position: relative;
+  overflow: hidden;
+}
+
+.strength-bar.weak::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 33%;
+  height: 100%;
+  background: #e74c3c;
+  border-radius: 4px;
+}
+
+.strength-bar.medium::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 66%;
+  height: 100%;
+  background: #f39c12;
+  border-radius: 4px;
+}
+
+.strength-bar.strong::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: #27ae60;
+  border-radius: 4px;
+}
+
+.password-strength span {
+  font-size: 12px;
+}
+
+.password-strength span.weak { color: #e74c3c; }
+.password-strength span.medium { color: #f39c12; }
+.password-strength span.strong { color: #27ae60; }
+
+/* Form Row para Register */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Opciones del formulario */
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.checkbox-label input {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: #667eea;
+}
+
+.checkbox-label span {
+  user-select: none;
+}
+
+.forgot-link {
+  color: #667eea;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.forgot-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.terms {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.terms a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.terms a:hover {
+  color: #764ba2;
+}
+
+/* Botón principal */
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Spinner de carga */
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid white;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Footer */
+.auth-footer {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #eef2f6;
+}
+
+.auth-footer p {
+  color: #7f8c8d;
+  font-size: 14px;
+  margin: 0;
+}
+
+.auth-footer a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.auth-footer a:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .auth-card {
+    padding: 32px 24px;
+    max-width: 420px;
+  }
+  
+  /* Logo más pequeño pero nítido en tablet */
+  .logo {
+    width: 75px;
+    height: 75px;
+  }
+  
+  .logo-container::after {
+    width: 85px;
+    height: 85px;
+  }
+  
+  .auth-header h1 {
+    font-size: 28px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .input-group input,
+  .input-group select {
+    padding: 12px 16px 12px 48px;
+    font-size: 14px;
+  }
+  
+  .btn-primary {
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+/* Móvil */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 24px 20px;
+    max-width: 100%;
+  }
+  
+  /* Logo más pequeño pero proporcionado en móvil */
+  .logo {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .logo-container::after {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .auth-header h1 {
+    font-size: 24px;
+  }
+  
+  .auth-header p {
+    font-size: 12px;
+  }
+  
+  .form-options {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .input-group i:first-child {
+    left: 12px;
+    font-size: 14px;
+  }
+  
+  .input-group input,
+  .input-group select {
+    padding: 10px 12px 10px 40px;
+    font-size: 14px;
+  }
+  
+  .btn-primary {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+
+/* Para pantallas muy pequeñas */
+@media (max-width: 360px) {
+  .logo {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .logo-container::after {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .auth-header h1 {
+    font-size: 22px;
+  }
+}
+
+/* ============================================
+   UTILIDADES ADICIONALES
+   ============================================ */
+
+/* Mejora la nitidez del logo en retina displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .logo {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Transición suave para todos los elementos interactivos */
+.btn-primary,
+.input-group input,
+.input-group select,
+.toggle-password,
+.forgot-link,
+.auth-footer a,
+.logo {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Focus visible para accesibilidad */
+.btn-primary:focus-visible,
+.input-group input:focus-visible,
+.toggle-password:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}

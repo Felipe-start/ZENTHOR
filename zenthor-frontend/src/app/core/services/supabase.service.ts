@@ -22,15 +22,17 @@ export class SupabaseService {
   private supabase: SupabaseClient;
 
   constructor() {
-    // Configuración mínima para evitar locks
     this.supabase = createClient(
       environment.supabaseUrl,
       environment.supabaseAnonKey,
       {
         auth: {
-          autoRefreshToken: false, // Deshabilitar auto-refresh para evitar locks
-          persistSession: false, // No persistir sesión automáticamente
-          detectSessionInUrl: false
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+          storage: localStorage,
+          storageKey: 'supabase-auth-token',
+          flowType: 'pkce'
         }
       }
     );
@@ -53,12 +55,11 @@ export class SupabaseService {
         throw new Error('Invalid login response');
       }
       
-      // Guardar token manualmente
-      const token = data.session.access_token;
-      localStorage.setItem('token', token);
+      localStorage.setItem('token', data.session.access_token);
+      localStorage.setItem('supabase-auth-token', data.session.access_token);
       
       return {
-        token: token,
+        token: data.session.access_token,
         user: {
           id: data.user.id,
           email: data.user.email,
@@ -91,6 +92,7 @@ export class SupabaseService {
       const token = data.session?.access_token || '';
       if (token) {
         localStorage.setItem('token', token);
+        localStorage.setItem('supabase-auth-token', token);
       }
       
       return {
@@ -108,16 +110,59 @@ export class SupabaseService {
     }
   }
 
+  // 🔐 NUEVO: Recuperación de contraseña
+  async resetPassword(email: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) throw error;
+      
+      return {
+        success: true,
+        message: 'Se ha enviado un enlace de recuperación a tu correo electrónico'
+      };
+    } catch (error: any) {
+      console.error('Error en reset password:', error);
+      return {
+        success: false,
+        message: error.message || 'Error al enviar el correo de recuperación'
+      };
+    }
+  }
+
+  // 🔐 NUEVO: Actualizar contraseña (después del reset)
+  async updatePassword(newPassword: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const { error } = await this.supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) throw error;
+      
+      return {
+        success: true,
+        message: 'Contraseña actualizada exitosamente'
+      };
+    } catch (error: any) {
+      console.error('Error en update password:', error);
+      return {
+        success: false,
+        message: error.message || 'Error al actualizar la contraseña'
+      };
+    }
+  }
+
   async logout() {
     try {
-      // Intentar cerrar sesión en Supabase
       await this.supabase.auth.signOut();
+      localStorage.removeItem('token');
+      localStorage.removeItem('supabase-auth-token');
+      localStorage.removeItem('user');
     } catch (error) {
       console.error('Error en logout:', error);
-    } finally {
-      // Siempre limpiar localStorage
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      throw error;
     }
   }
 

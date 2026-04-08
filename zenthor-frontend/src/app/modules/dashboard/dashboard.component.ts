@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+/*import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Chart } from 'chart.js/auto';
 import { TareasService } from '../../core/services/tareas.service';
 import { ExamenesService } from '../../core/services/examenes.service';
@@ -751,3 +751,5 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/materias']);
   }
 }
+
+*/

@@ -5,22 +5,30 @@ import { Component } from '@angular/core';
   template: `
     <footer class="footer">
       <div class="footer-content">
-        <p>&copy; 2024 ZENTHOR. Todos los derechos reservados.</p>
+        <div class="footer-brand">
+          <img src="assets/images/LOGO.jpg" alt="ZENTHOR" class="footer-logo" (error)="handleImageError($event)">
+          <span>ZENTHOR</span>
+        </div>
+        <p>&copy; {{ currentYear }} ZENTHOR. Todos los derechos reservados.</p>
         <div class="footer-links">
-          <a href="#">Términos</a>
-          <a href="#">Privacidad</a>
-          <a href="#">Contacto</a>
+          <a href="#" class="footer-link">Términos</a>
+          <span class="separator">•</span>
+          <a href="#" class="footer-link">Privacidad</a>
+          <span class="separator">•</span>
+          <a href="#" class="footer-link">Contacto</a>
         </div>
       </div>
     </footer>
   `,
   styles: [`
     .footer {
-      background: white;
-      border-top: 1px solid #eef2f6;
+      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
       padding: 20px 24px;
       margin-top: auto;
+      width: 100%;
     }
+    
     .footer-content {
       max-width: 1400px;
       margin: 0 auto;
@@ -28,27 +36,73 @@ import { Component } from '@angular/core';
       justify-content: space-between;
       align-items: center;
       font-size: 14px;
-      color: #7f8c8d;
+      color: #9ca3af;
+      flex-wrap: wrap;
+      gap: 16px;
     }
+    
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .footer-logo {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    
+    .footer-brand span {
+      font-weight: 600;
+      background: linear-gradient(135deg, #a78bfa, #c4b5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
     .footer-links {
       display: flex;
-      gap: 24px;
+      gap: 12px;
+      align-items: center;
     }
-    .footer-links a {
-      color: #7f8c8d;
+    
+    .footer-link {
+      color: #9ca3af;
       text-decoration: none;
-      transition: color 0.3s ease;
+      transition: all 0.3s ease;
     }
-    .footer-links a:hover {
-      color: #667eea;
+    
+    .footer-link:hover {
+      color: #a78bfa;
+      transform: translateY(-2px);
     }
+    
+    .separator {
+      color: #4b5563;
+    }
+    
     @media (max-width: 768px) {
+      .footer {
+        padding: 16px 20px;
+      }
+      
       .footer-content {
         flex-direction: column;
-        gap: 12px;
         text-align: center;
+        gap: 12px;
+      }
+      
+      .footer-links {
+        justify-content: center;
       }
     }
   `]
 })
-export class FooterComponent {}
+export class FooterComponent {
+  currentYear = new Date().getFullYear();
+
+  handleImageError(event: any) {
+    event.target.src = 'https://via.placeholder.com/30x30?text=Z';
+  }
+}
