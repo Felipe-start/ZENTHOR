@@ -8,17 +8,15 @@ const materiasRoutes = require('./routes/materias.routes');
 const errorHandler = require('./middleware/errorHandler');
 const tareasRoutes = require('./routes/tareas.routes');
 
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-
 // Middlewares globales
-app.use(helmet()); // Seguridad: headers HTTP
-app.use(cors()); // Habilitar CORS para el frontend
-app.use(express.json()); // Parsear JSON
-app.use(express.urlencoded({ extended: true })); // Parsear URL encoded
-app.use(morgan('dev')); // Logging de peticiones
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('dev'));
 
 // Ruta de health check
 app.get('/health', (req, res) => {
@@ -33,8 +31,7 @@ app.get('/health', (req, res) => {
 app.use('/api/materias', materiasRoutes);
 app.use('/api/tareas', tareasRoutes);
 
-
-// Ruta 404 para endpoints no encontrados
+// Ruta 404
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
@@ -42,7 +39,7 @@ app.use('*', (req, res) => {
   });
 });
 
-// Middleware de manejo de errores (debe ir al final)
+// Middleware de manejo de errores
 app.use(errorHandler);
 
 // Iniciar servidor

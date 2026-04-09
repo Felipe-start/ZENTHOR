@@ -44,6 +44,9 @@ import { AuthService } from '../../../core/services/auth.service';
         </div>
         
         <div class="navbar-end">
+          <!-- CAMPANA DE NOTIFICACIONES -->
+          <app-notification-bell></app-notification-bell>
+          
           <div class="user-menu" (click)="toggleUserMenu()">
             <div class="user-avatar">
               {{ getUserInitials() }}
@@ -158,6 +161,9 @@ import { AuthService } from '../../../core/services/auth.service';
     
     .navbar-end {
       position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .user-menu {
@@ -185,6 +191,16 @@ import { AuthService } from '../../../core/services/auth.service';
     .user-name {
       color: white;
       font-weight: 500;
+    }
+    
+    .fa-chevron-down {
+      transition: transform 0.3s ease;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+    }
+    
+    .fa-chevron-down.rotated {
+      transform: rotate(180deg);
     }
     
     .dropdown-menu {

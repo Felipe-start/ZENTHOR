@@ -8,17 +8,25 @@
     "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["zenthor", "academic", "api", "education"],
+  "keywords": [
+    "zenthor",
+    "academic",
+    "api",
+    "education"
+  ],
   "author": "Gustavo - Database Engineer",
   "license": "MIT",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
+    "@types/nodemailer": "^8.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "helmet": "^7.1.0",
     "joi": "^17.11.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.5"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

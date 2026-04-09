@@ -1,0 +1,42 @@
+<div class="notification-bell" (click)="toggleDropdown()">
+  <div class="bell-icon">
+    <i class="fas fa-bell"></i>
+    <span class="badge" *ngIf="notificacionesNoLeidas > 0">{{ notificacionesNoLeidas > 9 ? '9+' : notificacionesNoLeidas }}</span>
+  </div>
+  
+  <div class="dropdown-menu" [class.show]="dropdownOpen">
+    <div class="dropdown-header">
+      <h4>Notificaciones</h4>
+      <button *ngIf="notificaciones.length > 0" (click)="marcarTodasLeidas($event)" class="mark-all">
+        Marcar todas
+      </button>
+    </div>
+    
+    <div class="dropdown-body">
+      <div *ngIf="notificaciones.length === 0" class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <p>No hay notificaciones</p>
+      </div>
+      
+      <div *ngFor="let notif of notificaciones" class="notification-item" [class.unread]="!notif.read">
+        <div class="notification-icon">
+          <i [class]="notif.icon"></i>
+        </div>
+        <div class="notification-content">
+          <div class="notification-title">{{ notif.title }}</div>
+          <div class="notification-message">{{ notif.message }}</div>
+          <div class="notification-time">{{ notif.time | date:'short' }}</div>
+        </div>
+        <button *ngIf="notif.action" (click)="irALink(notif.action.link, notif.id, $event)" class="notification-action">
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="dropdown-footer" *ngIf="notificaciones.length > 0">
+      <button (click)="limpiarTodas($event)" class="clear-all">
+        Limpiar todas
+      </button>
+    </div>
+  </div>
+</div>

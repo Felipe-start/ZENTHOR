@@ -13,11 +13,13 @@ import { AppComponent } from './app.component';
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
 import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
+import { NotificationBellComponent } from './shared/components/notification-bell/notification-bell.component';
 
 // Services
 import { AuthService } from './core/services/auth.service';
 import { ApiService } from './core/services/api.service';
 import { SupabaseService } from './core/services/supabase.service';
+import { NotificationService } from './core/services/notification.service';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
 @NgModule({
@@ -25,7 +27,8 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
     AppComponent,
     NavbarComponent,
     SidebarComponent,
-    FooterComponent
+    FooterComponent,
+    NotificationBellComponent
   ],
   imports: [
     BrowserModule,
@@ -47,6 +50,7 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
     AuthService,
     ApiService,
     SupabaseService,
+    NotificationService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
