@@ -1,9 +1,13 @@
-const { enviarRecordatorios } = require('./recordatorios');//
+require('./config/env'); // PRIMERO SIEMPRE
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-require('dotenv').config();
+
+const { enviarRecordatorios } = require('./recordatorios');
+
+
 
 const materiasRoutes = require('./routes/materias.routes');
 const errorHandler = require('./middleware/errorHandler');
@@ -31,6 +35,14 @@ app.get('/health', (req, res) => {
 // Rutas de la API
 app.use('/api/materias', materiasRoutes);
 app.use('/api/tareas', tareasRoutes);
+
+
+// ENDPOINT DE Recordatorios
+
+app.get('/test-recordatorios', async (req, res) => {
+  await enviarRecordatorios();
+  res.json({ ok: true });
+});
 
 // Ruta 404
 app.use('*', (req, res) => {

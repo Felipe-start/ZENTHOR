@@ -1,11 +1,5 @@
 const nodemailer = require('nodemailer');
-const { createClient } = require('@supabase/supabase-js');
-
-// 🔐 CONFIGURA ESTO
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+const { supabaseAdmin } = require('./config/supabase');
 
 // 📧 CONFIG CORREO (GMAIL)
 const transporter = nodemailer.createTransport({
@@ -25,7 +19,7 @@ const enviarRecordatorios = async () => {
     console.log("⏰ Buscando eventos próximos...");
 
     // 📌 TAREAS
-    const { data: tareas, error: errorTareas } = await supabase
+    const { data: tareas, error: errorTareas } = await supabaseAdmin
       .from('tareas')
       .select('*')
       .gte('fecha_entrega', ahora.toISOString())
@@ -38,7 +32,7 @@ const enviarRecordatorios = async () => {
     }
 
     // 📌 EXÁMENES
-    const { data: examenes, error: errorExamenes } = await supabase
+    const { data: examenes, error: errorExamenes } = await supabaseAdmin
       .from('examenes')
       .select('*')
       .gte('fecha_examen', ahora.toISOString())
@@ -59,12 +53,17 @@ const enviarRecordatorios = async () => {
 const procesarEvento = async (evento, tipo) => {
   try {
 
-    const { data: historial } = await supabase
+    console.log("🧠 EVENTO ID:", evento.id);
+
+    // 🔍 Verificar si ya se envió
+    const { data: historial } = await supabaseAdmin
       .from('recordatorios_historial')
       .select('*')
       .eq('evento_id', evento.id)
       .eq('tipo_evento', tipo)
       .eq('tipo_recordatorio', '24h');
+
+    console.log("📜 HISTORIAL:", historial);
 
     if (historial && historial.length > 0) {
       console.log(`⏭ Ya enviado (${tipo} ${evento.id})`);
@@ -73,6 +72,8 @@ const procesarEvento = async (evento, tipo) => {
 
     // 📧 Obtener email
     const email = await obtenerEmailUsuario(evento.usuario_id);
+
+    console.log("📧 EMAIL:", email);
 
     if (!email) {
       console.log("⚠️ No se encontró email");
@@ -83,7 +84,7 @@ const procesarEvento = async (evento, tipo) => {
     await enviarCorreo(evento, tipo, email);
 
     // 💾 Guardar historial
-    await supabase.from('recordatorios_historial').insert({
+    await supabaseAdmin.from('recordatorios_historial').insert({
       usuario_id: evento.usuario_id,
       tipo_evento: tipo,
       evento_id: evento.id,
@@ -106,6 +107,8 @@ const enviarCorreo = async (evento, tipo, email) => {
       ? `📚 Tienes una tarea próxima:\n\n${evento.titulo}\nEntrega: ${evento.fecha_entrega}`
       : `📝 Tienes un examen próximo\nFecha: ${evento.fecha_examen}`;
 
+  console.log("📤 Enviando correo a:", email);
+
   await transporter.sendMail({
     from: process.env.EMAIL_USER,
     to: email,
@@ -116,15 +119,15 @@ const enviarCorreo = async (evento, tipo, email) => {
 
 // 🔐 OBTENER EMAIL
 const obtenerEmailUsuario = async (userId) => {
-  const { data, error } = await supabase.auth.admin.getUserById(userId);
+  const { data, error } = await supabaseAdmin.auth.admin.getUserById(userId);
 
   if (error) {
-    console.error("Error obteniendo email:", error);
+    console.error("❌ Error obteniendo email:", error);
     return null;
   }
 
-  return data.user.email;
+  return data?.user?.email;
 };
 
-// 🔥 EXPORT CORRECTO
+// 🔥 EXPORT
 module.exports = { enviarRecordatorios };
