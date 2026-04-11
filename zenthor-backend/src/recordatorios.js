@@ -1,12 +1,13 @@
-const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
-require('dotenv').config();
+const { createClient } = require('@supabase/supabase-js');
 
-const supabaseAdmin = createClient(
+// 🔐 CONFIGURA ESTO
+const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.SUPABASE_KEY
 );
 
+// 📧 CONFIG CORREO (GMAIL)
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -15,338 +16,115 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-function isEmailConfigured() {
-  return !!(process.env.EMAIL_USER && process.env.EMAIL_PASS);
-}
-
-function escapeHtml(text) {
-  if (!text) return '';
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-// URL del logo real de ZENTHOR (cambia por la URL de tu logo JPG)
-// Opción 1: Usar el logo del frontend (si está disponible públicamente)
-const LOGO_URL = 'https://curly-goggles-6946jpjvppp93rxrv-4200.app.github.dev/assets/images/ LOGO Z.jpg';
-
-// Opción 2: Si el logo no es accesible públicamente, usar base64
-// Puedes convertir tu JPG a base64 con: base64 -w0 logo.jpg
-
-async function enviarRecordatorio(email, tarea, tipo) {
-  const tiempoRestante = tipo === '24h' ? '24 horas' : '1 hora';
-  const prioridadColores = {
-    baja: '#10b981',
-    media: '#f59e0b',
-    alta: '#ef4444'
-  };
-  const prioridadIconos = {
-    baja: '🟢',
-    media: '🟡',
-    alta: '🔴'
-  };
-
-  const fechaEntrega = new Date(tarea.fecha_entrega);
-  const fechaFormateada = fechaEntrega.toLocaleDateString('es-MX', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-  const horaFormateada = fechaEntrega.toLocaleTimeString('es-MX', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>Recordatorio ZENTHOR</title>
-      <style>
-        body {
-          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-          margin: 0;
-          padding: 20px;
-        }
-        .container {
-          max-width: 600px;
-          margin: 0 auto;
-          background: white;
-          border-radius: 24px;
-          overflow: hidden;
-          box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.15);
-        }
-        .header {
-          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
-          padding: 32px;
-          text-align: center;
-        }
-        .logo {
-          width: 80px;
-          height: 80px;
-          border-radius: 20px;
-          margin: 0 auto 16px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: white;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .logo img {
-          width: 70px;
-          height: 70px;
-          border-radius: 16px;
-          object-fit: cover;
-        }
-        .header h1 {
-          color: white;
-          font-size: 24px;
-          margin: 0;
-          font-weight: 700;
-        }
-        .header p {
-          color: rgba(255,255,255,0.9);
-          margin: 8px 0 0;
-        }
-        .content {
-          padding: 32px;
-        }
-        .alert-badge {
-          background: linear-gradient(135deg, #fee2e2, #fecaca);
-          color: #dc2626;
-          padding: 8px 16px;
-          border-radius: 40px;
-          display: inline-block;
-          font-size: 14px;
-          font-weight: 600;
-          margin-bottom: 20px;
-        }
-        .task-title {
-          font-size: 24px;
-          font-weight: 700;
-          color: #1f2937;
-          margin-bottom: 16px;
-        }
-        .task-details {
-          background: #f9fafb;
-          border-radius: 16px;
-          padding: 20px;
-          margin: 20px 0;
-        }
-        .detail-row {
-          display: flex;
-          justify-content: space-between;
-          padding: 12px 0;
-          border-bottom: 1px solid #e5e7eb;
-        }
-        .detail-row:last-child {
-          border-bottom: none;
-        }
-        .detail-label {
-          font-weight: 600;
-          color: #4b5563;
-        }
-        .detail-value {
-          color: #1f2937;
-        }
-        .priority-badge {
-          display: inline-block;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 600;
-          background: ${prioridadColores[tarea.prioridad] || '#6b7280'};
-          color: white;
-        }
-        .materia-tag {
-          display: inline-block;
-          background: #eef2ff;
-          color: #4f46e5;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 500;
-        }
-        .button {
-          display: inline-block;
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
-          color: white;
-          padding: 12px 24px;
-          border-radius: 12px;
-          text-decoration: none;
-          font-weight: 600;
-          margin-top: 20px;
-          transition: transform 0.2s;
-        }
-        .button:hover {
-          transform: translateY(-2px);
-        }
-        .footer {
-          text-align: center;
-          padding: 24px;
-          background: #f9fafb;
-          border-top: 1px solid #e5e7eb;
-          color: #6b7280;
-          font-size: 12px;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <div class="logo">
-            <img src="${LOGO_URL}" alt="ZENTHOR" onerror="this.src='https://via.placeholder.com/70x70?text=Z'">
-          </div>
-          <h1>📋 Recordatorio de Tarea</h1>
-          <p>ZENTHOR - Organiza tu vida académica</p>
-        </div>
-        <div class="content">
-          <div class="alert-badge">
-            ⏰ ¡Recordatorio de ${tiempoRestante}!
-          </div>
-          <div class="task-title">
-            ${prioridadIconos[tarea.prioridad] || '📌'} ${escapeHtml(tarea.titulo)}
-          </div>
-          <div class="task-details">
-            <div class="detail-row">
-              <span class="detail-label">📚 Materia:</span>
-              <span class="detail-value"><span class="materia-tag">${escapeHtml(tarea.materias?.nombre || 'Sin materia')}</span></span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">📅 Fecha de entrega:</span>
-              <span class="detail-value">${fechaFormateada}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">⏰ Hora:</span>
-              <span class="detail-value">${horaFormateada}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">🎯 Prioridad:</span>
-              <span class="detail-value"><span class="priority-badge">${tarea.prioridad?.toUpperCase() || 'MEDIA'}</span></span>
-            </div>
-            ${tarea.descripcion ? `
-            <div class="detail-row">
-              <span class="detail-label">📝 Descripción:</span>
-              <span class="detail-value">${escapeHtml(tarea.descripcion.substring(0, 200))}${tarea.descripcion.length > 200 ? '...' : ''}</span>
-            </div>
-            ` : ''}
-          </div>
-          <div style="text-align: center;">
-            <a href="${process.env.FRONTEND_URL || 'http://localhost:4200'}/tareas" class="button">
-              ✨ Ver mis tareas ✨
-            </a>
-          </div>
-        </div>
-        <div class="footer">
-          <p>Este es un recordatorio automático de ZENTHOR Enterprise.</p>
-          <p>© ${new Date().getFullYear()} ZENTHOR - Todos los derechos reservados</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-  const text = `
-    ZENTHOR Enterprise - Recordatorio de Tarea
-    ==========================================
-    
-    ⏰ ¡Recordatorio de ${tiempoRestante}!
-    
-    Tarea: ${tarea.titulo}
-    Materia: ${tarea.materias?.nombre || 'Sin materia'}
-    Fecha de entrega: ${fechaFormateada}
-    Hora: ${horaFormateada}
-    Prioridad: ${tarea.prioridad?.toUpperCase() || 'MEDIA'}
-    
-    ${tarea.descripcion ? `Descripción: ${tarea.descripcion}` : ''}
-    
-    Visita ZENTHOR para más detalles:
-    ${process.env.FRONTEND_URL || 'http://localhost:4200'}/tareas
-  `;
-
+// 🧠 FUNCIÓN PRINCIPAL
+const enviarRecordatorios = async () => {
   try {
-    const info = await transporter.sendMail({
-      from: `"ZENTHOR Enterprise" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: `📋 ${prioridadIconos[tarea.prioridad] || '📌'} ${tarea.titulo} - ZENTHOR Enterprise`,
-      text: text,
-      html: html
-    });
-    console.log(`✅ Email enviado a ${email} para: ${tarea.titulo}`);
-    return true;
-  } catch (error) {
-    console.error(`❌ Error enviando email:`, error.message);
-    return false;
-  }
-}
-
-async function verificarYEnviarRecordatorios() {
-  try {
-    console.log('🔍 Verificando recordatorios...', new Date().toISOString());
-    
-    if (!isEmailConfigured()) {
-      console.log('⚠️ Email no configurado');
-      return;
-    }
-    
     const ahora = new Date();
+    const en24h = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
 
-    const { data: tareas, error } = await supabaseAdmin
+    console.log("⏰ Buscando eventos próximos...");
+
+    // 📌 TAREAS
+    const { data: tareas, error: errorTareas } = await supabase
       .from('tareas')
-      .select(`
-        *,
-        materias (nombre, color)
-      `)
-      .eq('estado', 'pendiente')
-      .gte('fecha_entrega', ahora.toISOString());
+      .select('*')
+      .gte('fecha_entrega', ahora.toISOString())
+      .lte('fecha_entrega', en24h.toISOString());
 
-    if (error) {
-      console.error('Error obteniendo tareas:', error);
+    if (errorTareas) throw errorTareas;
+
+    for (let tarea of tareas || []) {
+      await procesarEvento(tarea, 'tarea');
+    }
+
+    // 📌 EXÁMENES
+    const { data: examenes, error: errorExamenes } = await supabase
+      .from('examenes')
+      .select('*')
+      .gte('fecha_examen', ahora.toISOString())
+      .lte('fecha_examen', en24h.toISOString());
+
+    if (errorExamenes) throw errorExamenes;
+
+    for (let examen of examenes || []) {
+      await procesarEvento(examen, 'examen');
+    }
+
+  } catch (error) {
+    console.error("❌ Error en recordatorios:", error);
+  }
+};
+
+// 🔁 PROCESAR EVENTO
+const procesarEvento = async (evento, tipo) => {
+  try {
+
+    const { data: historial } = await supabase
+      .from('recordatorios_historial')
+      .select('*')
+      .eq('evento_id', evento.id)
+      .eq('tipo_evento', tipo)
+      .eq('tipo_recordatorio', '24h');
+
+    if (historial && historial.length > 0) {
+      console.log(`⏭ Ya enviado (${tipo} ${evento.id})`);
       return;
     }
 
-    console.log(`📊 Revisando ${tareas?.length || 0} tareas pendientes`);
+    // 📧 Obtener email
+    const email = await obtenerEmailUsuario(evento.usuario_id);
 
-    for (const tarea of tareas || []) {
-      const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(tarea.usuario_id);
-      
-      if (authError || !authUser?.user?.email) {
-        console.error(`❌ No se pudo obtener email para usuario ${tarea.usuario_id}`);
-        continue;
-      }
-
-      const email = authUser.user.email;
-      const fechaEntrega = new Date(tarea.fecha_entrega);
-      const horasRestantes = (fechaEntrega - ahora) / (1000 * 60 * 60);
-
-      if (horasRestantes <= 24.5 && horasRestantes >= 23.5) {
-        console.log(`📧 Enviando recordatorio 24h para: ${tarea.titulo} -> ${email}`);
-        await enviarRecordatorio(email, tarea, '24h');
-      }
-      
-      if (horasRestantes <= 1.5 && horasRestantes >= 0.5) {
-        console.log(`📧 Enviando recordatorio 1h para: ${tarea.titulo} -> ${email}`);
-        await enviarRecordatorio(email, tarea, '1h');
-      }
+    if (!email) {
+      console.log("⚠️ No se encontró email");
+      return;
     }
-    
-    console.log('✅ Verificación completada');
-  } catch (error) {
-    console.error('Error en verificación:', error);
-  }
-}
 
-if (process.argv.includes('--once')) {
-  verificarYEnviarRecordatorios().then(() => process.exit(0));
-} else {
-  verificarYEnviarRecordatorios();
-  setInterval(verificarYEnviarRecordatorios, 60 * 60 * 1000);
-  console.log('🕐 Servicio de recordatorios iniciado (modo continuo)');
-  console.log('📧 Se enviarán correos automáticamente cada hora');
-}
+    // 📤 Enviar correo
+    await enviarCorreo(evento, tipo, email);
+
+    // 💾 Guardar historial
+    await supabase.from('recordatorios_historial').insert({
+      usuario_id: evento.usuario_id,
+      tipo_evento: tipo,
+      evento_id: evento.id,
+      tipo_recordatorio: '24h',
+      email_enviado: email,
+      status: 'enviado'
+    });
+
+    console.log(`✅ Recordatorio enviado (${tipo})`);
+
+  } catch (error) {
+    console.error("❌ Error procesando evento:", error);
+  }
+};
+
+// 📧 ENVIAR CORREO
+const enviarCorreo = async (evento, tipo, email) => {
+  const mensaje =
+    tipo === 'tarea'
+      ? `📚 Tienes una tarea próxima:\n\n${evento.titulo}\nEntrega: ${evento.fecha_entrega}`
+      : `📝 Tienes un examen próximo\nFecha: ${evento.fecha_examen}`;
+
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: '📌 Recordatorio Académico - ZENTHOR',
+    text: mensaje
+  });
+};
+
+// 🔐 OBTENER EMAIL
+const obtenerEmailUsuario = async (userId) => {
+  const { data, error } = await supabase.auth.admin.getUserById(userId);
+
+  if (error) {
+    console.error("Error obteniendo email:", error);
+    return null;
+  }
+
+  return data.user.email;
+};
+
+// 🔥 EXPORT CORRECTO
+module.exports = { enviarRecordatorios };

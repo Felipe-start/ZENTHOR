@@ -1,3 +1,4 @@
+const { enviarRecordatorios } = require('./recordatorios');//
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -47,4 +48,12 @@ app.listen(PORT, () => {
   console.log(`🚀 Servidor backend de ZENTHOR corriendo en puerto ${PORT}`);
   console.log(`📝 Entorno: ${process.env.NODE_ENV || 'development'}`);
   console.log(`✅ API disponible en http://localhost:${PORT}`);
+
+  // 🔥 PROBAR RECORDATORIOS UNA VEZ
+  enviarRecordatorios();
+
+  // 🔁 (opcional después) cada minuto
+  setInterval(() => {
+    enviarRecordatorios();
+  }, 60000);
 });
