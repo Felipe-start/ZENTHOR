@@ -31,7 +31,7 @@ function escapeHtml(text) {
 
 // URL del logo real de ZENTHOR (cambia por la URL de tu logo JPG)
 // Opción 1: Usar el logo del frontend (si está disponible públicamente)
-const LOGO_URL = 'https://curly-goggles-6946jpjvppp93rxrv-4200.app.github.dev/assets/images/ LOGO Z.jpg';
+const LOGO_URL = '	https://special-giggle-r4pg4p79qjwq3pj7r-4200.app.github.dev/assets/images/LOGO.jpg';
 
 // Opción 2: Si el logo no es accesible públicamente, usar base64
 // Puedes convertir tu JPG a base64 con: base64 -w0 logo.jpg
