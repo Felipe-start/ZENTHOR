@@ -1,0 +1,247 @@
+/* ============================================
+   CALENDARIO ZENTHOR - Estilos Profesionales
+   ============================================ */
+
+.calendario-container {
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  min-height: calc(100vh - 70px);
+  border-radius: 0;
+}
+
+/* Header */
+.calendario-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.header-info h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 8px;
+}
+
+.header-info h1 i {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  color: #6366f1;
+  margin-right: 12px;
+}
+
+.subtitulo {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.header-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: white;
+  border-radius: 40px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4f46e5;
+}
+
+.stat-badge.exam {
+  color: #10b981;
+}
+
+.stat-badge i {
+  font-size: 1rem;
+}
+
+/* Wrapper del calendario */
+.calendario-wrapper {
+  background: white;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.calendario-wrapper:hover {
+  box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos FullCalendar personalizados */
+:host ::ng-deep .fc {
+  font-family: 'Inter', sans-serif;
+}
+
+:host ::ng-deep .fc-toolbar-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+:host ::ng-deep .fc-button-primary {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 40px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+:host ::ng-deep .fc-button-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+:host ::ng-deep .fc-button-primary:not(:disabled):active,
+:host ::ng-deep .fc-button-primary:focus {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  box-shadow: none;
+}
+
+:host ::ng-deep .fc-day-today {
+  background: #fef3c7 !important;
+}
+
+:host ::ng-deep .fc-day-today .fc-daygrid-day-number {
+  background: #f59e0b;
+  color: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:host ::ng-deep .fc-event {
+  border-radius: 12px;
+  border: none;
+  padding: 4px 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 2px;
+}
+
+:host ::ng-deep .fc-event:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.95);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+:host ::ng-deep .event-tarea {
+  border-left: 4px solid #f59e0b;
+}
+
+:host ::ng-deep .event-examen {
+  border-left: 4px solid #10b981;
+}
+
+:host ::ng-deep .fc-daygrid-day-frame {
+  transition: background 0.2s ease;
+}
+
+:host ::ng-deep .fc-daygrid-day-frame:hover {
+  background: #f9fafb;
+}
+
+:host ::ng-deep .fc-daygrid-day-number {
+  font-weight: 500;
+  color: #4b5563;
+}
+
+:host ::ng-deep .fc-event-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+:host ::ng-deep .fc-event-time {
+  font-size: 0.7rem;
+  opacity: 0.9;
+}
+
+/* Footer y leyenda */
+.calendario-footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+}
+
+.legend-color.tarea {
+  background: #6366f1;
+}
+
+.legend-color.examen {
+  background: #10b981;
+}
+
+.legend-item i {
+  color: #6366f1;
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .calendario-container {
+    padding: 16px;
+  }
+
+  .calendario-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-info h1 {
+    font-size: 1.5rem;
+  }
+
+  .calendario-wrapper {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  :host ::ng-deep .fc-toolbar {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  :host ::ng-deep .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+  }
+}

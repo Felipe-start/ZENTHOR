@@ -2,11 +2,11 @@ export interface Examen {
   id: number;
   usuario_id: string;
   materia_id: number;
-  fecha_examen: Date;
+  fecha_examen: string;
   temas?: string;
   aula?: string;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ExamenWithMateria extends Examen {

@@ -1,8 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { CalendarioComponent } from './calendario.component';
+import { CalendarioComponent } from './calendario/calendario.component';
 
-const routes: Routes = [{ path: '', component: CalendarioComponent }];
+const routes: Routes = [
+  { path: '', component: CalendarioComponent }
+];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

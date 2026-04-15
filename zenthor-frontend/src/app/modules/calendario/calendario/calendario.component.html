@@ -1,1 +1,42 @@
-<p>calendario works!</p>
+<div class="calendario-container">
+  <div class="calendario-header">
+    <div class="header-info">
+      <h1>
+        <i class="fas fa-calendar-alt"></i>
+        Calendario Académico
+      </h1>
+      <p class="subtitulo">Organiza tus tareas, exámenes y actividades en un solo lugar</p>
+    </div>
+    <div class="header-stats">
+      <div class="stat-badge">
+        <i class="fas fa-tasks"></i>
+        <span>Tareas pendientes</span>
+      </div>
+      <div class="stat-badge exam">
+        <i class="fas fa-calendar-check"></i>
+        <span>Próximos exámenes</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="calendario-wrapper">
+    <full-calendar [options]="calendarOptions"></full-calendar>
+  </div>
+
+  <div class="calendario-footer">
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-color tarea"></span>
+        <span>Tareas</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color examen"></span>
+        <span>Exámenes</span>
+      </div>
+      <div class="legend-item">
+        <i class="fas fa-plus-circle"></i>
+        <span>Haz clic en una fecha para crear evento</span>
+      </div>
+    </div>
+  </div>
+</div>

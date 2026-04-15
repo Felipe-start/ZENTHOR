@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry } from 'rxjs/operators';
+import { ToastrService } from 'ngx-toastr';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -10,7 +11,10 @@ import { environment } from '../../../environments/environment';
 export class ApiService {
   private apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private toastr: ToastrService
+  ) {}
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
@@ -20,55 +24,61 @@ export class ApiService {
     });
   }
 
-  private handleError(error: any) {
+  private handleError(error: HttpErrorResponse) {
     console.error('API Error:', error);
     let errorMessage = 'Ocurrió un error inesperado';
-    if (error.error?.message) {
+    
+    if (error.error instanceof ErrorEvent) {
       errorMessage = error.error.message;
+    } else if (error.status === 0) {
+      errorMessage = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
+      this.toastr.error(errorMessage, 'Error de conexión');
     } else if (error.status === 401) {
-      errorMessage = 'Sesión expirada, por favor inicia sesión nuevamente';
-    } else if (error.status === 404) {
-      errorMessage = 'Recurso no encontrado';
+      errorMessage = 'Sesión expirada. Por favor inicia sesión nuevamente';
+      this.toastr.error(errorMessage, 'No autorizado');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    } else if (error.error?.message) {
+      errorMessage = error.error.message;
+      this.toastr.error(errorMessage, 'Error');
+    } else {
+      this.toastr.error(errorMessage, 'Error');
     }
+    
     return throwError(() => new Error(errorMessage));
   }
 
-  // GET request
   get<T>(endpoint: string, params?: any): Observable<T> {
-    const httpParams = params ? new HttpParams({ fromObject: params }) : undefined;
-    return this.http.get<T>(`${this.apiUrl}${endpoint}`, {
-      headers: this.getHeaders(),
-      params: httpParams
-    }).pipe(
+    const url = `${this.apiUrl}${endpoint}`;
+    console.log('GET Request:', url);
+    return this.http.get<T>(url, { headers: this.getHeaders(), params }).pipe(
       retry(1),
-      catchError(this.handleError)
+      catchError(this.handleError.bind(this))
     );
   }
 
-  // POST request
   post<T>(endpoint: string, data: any): Observable<T> {
-    return this.http.post<T>(`${this.apiUrl}${endpoint}`, data, {
-      headers: this.getHeaders()
-    }).pipe(
-      catchError(this.handleError)
+    const url = `${this.apiUrl}${endpoint}`;
+    console.log('POST Request:', url);
+    return this.http.post<T>(url, data, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError.bind(this))
     );
   }
 
-  // PUT request
   put<T>(endpoint: string, data: any): Observable<T> {
-    return this.http.put<T>(`${this.apiUrl}${endpoint}`, data, {
-      headers: this.getHeaders()
-    }).pipe(
-      catchError(this.handleError)
+    const url = `${this.apiUrl}${endpoint}`;
+    console.log('PUT Request:', url);
+    return this.http.put<T>(url, data, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError.bind(this))
     );
   }
 
-  // DELETE request
   delete<T>(endpoint: string): Observable<T> {
-    return this.http.delete<T>(`${this.apiUrl}${endpoint}`, {
-      headers: this.getHeaders()
-    }).pipe(
-      catchError(this.handleError)
+    const url = `${this.apiUrl}${endpoint}`;
+    console.log('DELETE Request:', url);
+    return this.http.delete<T>(url, { headers: this.getHeaders() }).pipe(
+      catchError(this.handleError.bind(this))
     );
   }
 }

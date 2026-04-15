@@ -2,8 +2,9 @@ module.exports = {
   apps: [
     {
       name: 'zenthor-api',
-      script: 'src/index.js',
+      script: './src/index.js',
       instances: 1,
+      exec_mode: 'fork',
       autorestart: true,
       watch: false,
       env: {
@@ -13,8 +14,9 @@ module.exports = {
     },
     {
       name: 'zenthor-recordatorios',
-      script: 'src/recordatorios.js',
+      script: './src/recordatorios.js',
       instances: 1,
+      exec_mode: 'fork',
       autorestart: true,
       watch: false,
       env: {

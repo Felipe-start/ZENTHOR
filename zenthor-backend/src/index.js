@@ -1,9 +1,12 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-require('dotenv').config();
-
+const examenesRoutes = require('./routes/examenes.routes');
+const calendarioRoutes = require('./routes/calendario.routes');
 const materiasRoutes = require('./routes/materias.routes');
 const errorHandler = require('./middleware/errorHandler');
 const tareasRoutes = require('./routes/tareas.routes');
@@ -11,9 +14,18 @@ const tareasRoutes = require('./routes/tareas.routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Configuración CORS - PERMITIR TODOS LOS ORÍGENES (para desarrollo)
+app.use(cors({
+  origin: '*',  // Permitir cualquier origen
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Length', 'X-Requested-With'],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}));
+
 // Middlewares globales
-app.use(helmet());
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
@@ -30,6 +42,8 @@ app.get('/health', (req, res) => {
 // Rutas de la API
 app.use('/api/materias', materiasRoutes);
 app.use('/api/tareas', tareasRoutes);
+app.use('/api/examenes', examenesRoutes);
+app.use('/api/calendario', calendarioRoutes);
 
 // Ruta 404
 app.use('*', (req, res) => {
@@ -43,8 +57,9 @@ app.use('*', (req, res) => {
 app.use(errorHandler);
 
 // Iniciar servidor
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor backend de ZENTHOR corriendo en puerto ${PORT}`);
   console.log(`📝 Entorno: ${process.env.NODE_ENV || 'development'}`);
   console.log(`✅ API disponible en http://localhost:${PORT}`);
+  console.log(`🌐 CORS: Permitido desde cualquier origen`);
 });

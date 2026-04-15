@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://special-giggle-r4pg4p79qjwq3pj7r-3000.app.github.dev',
+  apiUrl: 'https://urban-waddle-4qq4wvgwv5fjw6w-3000.app.github.dev',
   supabaseUrl: 'https://mihxvrcztlluwnbbzfhh.supabase.co',
   supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1paHh2cmN6dGxsdXduYmJ6ZmhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzMjEwMDEsImV4cCI6MjA4ODg5NzAwMX0.cwv3aoypgrGrzCNPV4mDLGakkMGzRDKPp_VYD8iqE14'
 };
