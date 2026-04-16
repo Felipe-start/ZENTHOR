@@ -18,10 +18,15 @@ export class ApiService {
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': token ? `Bearer ${token}` : ''
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json'
     });
+    
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    
+    return headers;
   }
 
   private handleError(error: HttpErrorResponse) {
@@ -38,7 +43,7 @@ export class ApiService {
       this.toastr.error(errorMessage, 'No autorizado');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+      window.location.href = '/ZENTHOR/';
     } else if (error.error?.message) {
       errorMessage = error.error.message;
       this.toastr.error(errorMessage, 'Error');
@@ -51,7 +56,6 @@ export class ApiService {
 
   get<T>(endpoint: string, params?: any): Observable<T> {
     const url = `${this.apiUrl}${endpoint}`;
-    console.log('GET Request:', url);
     return this.http.get<T>(url, { headers: this.getHeaders(), params }).pipe(
       retry(1),
       catchError(this.handleError.bind(this))
@@ -60,7 +64,6 @@ export class ApiService {
 
   post<T>(endpoint: string, data: any): Observable<T> {
     const url = `${this.apiUrl}${endpoint}`;
-    console.log('POST Request:', url);
     return this.http.post<T>(url, data, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError.bind(this))
     );
@@ -68,7 +71,6 @@ export class ApiService {
 
   put<T>(endpoint: string, data: any): Observable<T> {
     const url = `${this.apiUrl}${endpoint}`;
-    console.log('PUT Request:', url);
     return this.http.put<T>(url, data, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError.bind(this))
     );
@@ -76,7 +78,6 @@ export class ApiService {
 
   delete<T>(endpoint: string): Observable<T> {
     const url = `${this.apiUrl}${endpoint}`;
-    console.log('DELETE Request:', url);
     return this.http.delete<T>(url, { headers: this.getHeaders() }).pipe(
       catchError(this.handleError.bind(this))
     );
