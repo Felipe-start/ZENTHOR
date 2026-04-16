@@ -1,14 +1,12 @@
 const { getSupabaseClient } = require('../config/supabase');
 
-/**
- * Middleware para verificar token JWT y obtener usuario autenticado
- * Este middleware debe usarse en todas las rutas protegidas
- */
 const authMiddleware = async (req, res, next) => {
   try {
-    // Obtener token del header Authorization
     const authHeader = req.headers.authorization;
+    console.log('🔍 Auth Header recibido:', authHeader ? 'Presente' : 'Ausente');
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ Token no proporcionado o formato incorrecto');
       return res.status(401).json({
         success: false,
         message: 'No se proporcionó token de autenticación'
@@ -16,29 +14,43 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
+    console.log('🔑 Token recibido (primeros 20 chars):', token.substring(0, 20) + '...');
     
-    // Crear cliente autenticado con el token del usuario
-    const supabase = getSupabaseClient(token);
-    
-    // Verificar token y obtener usuario
-    const { data: { user }, error } = await supabase.auth.getUser();
-    
-    if (error || !user) {
-      console.error('Error de autenticación:', error);
+    try {
+      const supabase = getSupabaseClient(token);
+      const { data: { user }, error } = await supabase.auth.getUser();
+      
+      if (error) {
+        console.error('❌ Error de Supabase:', error.message);
+        return res.status(401).json({
+          success: false,
+          message: `Token inválido: ${error.message}`
+        });
+      }
+      
+      if (!user) {
+        console.error('❌ Usuario no encontrado');
+        return res.status(401).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+      }
+      
+      console.log('✅ Usuario autenticado:', user.id);
+      req.user = user;
+      req.supabase = supabase;
+      req.userId = user.id;
+      
+      next();
+    } catch (verifyError) {
+      console.error('❌ Error verificando token:', verifyError.message);
       return res.status(401).json({
         success: false,
-        message: 'Token inválido o expirado'
+        message: 'Error verificando token'
       });
     }
-    
-    // Adjuntar usuario y cliente autenticado al request
-    req.user = user;
-    req.supabase = supabase;
-    req.userId = user.id;
-    
-    next();
   } catch (error) {
-    console.error('Error en middleware de autenticación:', error);
+    console.error('❌ Error en middleware:', error);
     return res.status(500).json({
       success: false,
       message: 'Error interno del servidor'

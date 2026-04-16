@@ -16,13 +16,10 @@ const PORT = process.env.PORT || 3000;
 
 // Configuración CORS - PERMITIR TODOS LOS ORÍGENES (para desarrollo)
 app.use(cors({
-  origin: '*',  // Permitir cualquier origen
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  exposedHeaders: ['Content-Length', 'X-Requested-With'],
+  origin: ['https://felipe-start.github.io', 'http://localhost:4200', 'https://*.app.github.dev'],
   credentials: true,
-  preflightContinue: false,
-  optionsSuccessStatus: 204
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
 
 // Middlewares globales
