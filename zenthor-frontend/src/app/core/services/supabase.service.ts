@@ -44,28 +44,41 @@ export class SupabaseService {
 
   async login(email: string, password: string): Promise<AuthResponse> {
     try {
+      console.log('Intentando login para:', email);
       const { data, error } = await this.supabase.auth.signInWithPassword({
         email,
         password
       });
       
-      if (error) throw error;
-      
-      if (!data.session?.access_token || !data.user?.id || !data.user?.email) {
-        throw new Error('Invalid login response');
+      if (error) {
+        console.error('Error de Supabase:', error);
+        throw error;
       }
       
-      localStorage.setItem('token', data.session.access_token);
-      localStorage.setItem('supabase-auth-token', data.session.access_token);
+      if (!data.session?.access_token || !data.user?.id || !data.user?.email) {
+        throw new Error('No se recibió token o datos de usuario válidos');
+      }
+      
+      const token = data.session.access_token;
+      console.log('Token recibido, longitud:', token.length);
+      
+      // Guardar token en localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('supabase-auth-token', token);
+      
+      const user: Usuario = {
+        id: data.user.id,
+        email: data.user.email,
+        nombre_completo: data.user.user_metadata?.["nombre_completo"] || data.user.email.split('@')[0],
+        nivel_educativo: data.user.user_metadata?.["nivel_educativo"]
+      };
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      console.log('Login exitoso, token guardado');
       
       return {
-        token: data.session.access_token,
-        user: {
-          id: data.user.id,
-          email: data.user.email,
-          nombre_completo: data.user.user_metadata?.["nombre_completo"] || data.user.email.split('@')[0],
-          nivel_educativo: data.user.user_metadata?.["nivel_educativo"]
-        }
+        token: token,
+        user: user
       };
     } catch (error) {
       console.error('Error en login:', error);
@@ -95,14 +108,20 @@ export class SupabaseService {
         localStorage.setItem('supabase-auth-token', token);
       }
       
+      const user: Usuario = {
+        id: data.user.id,
+        email: data.user.email,
+        nombre_completo: metadata.nombre_completo,
+        nivel_educativo: metadata.nivel_educativo
+      };
+      
+      if (token) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+      
       return {
         token: token,
-        user: {
-          id: data.user.id,
-          email: data.user.email,
-          nombre_completo: metadata.nombre_completo,
-          nivel_educativo: metadata.nivel_educativo
-        }
+        user: user
       };
     } catch (error) {
       console.error('Error en registro:', error);
@@ -110,7 +129,6 @@ export class SupabaseService {
     }
   }
 
-  // 🔐 NUEVO: Recuperación de contraseña
   async resetPassword(email: string): Promise<{ success: boolean; message: string }> {
     try {
       const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
@@ -132,7 +150,6 @@ export class SupabaseService {
     }
   }
 
-  // 🔐 NUEVO: Actualizar contraseña (después del reset)
   async updatePassword(newPassword: string): Promise<{ success: boolean; message: string }> {
     try {
       const { error } = await this.supabase.auth.updateUser({
