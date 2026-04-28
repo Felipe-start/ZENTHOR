@@ -240,6 +240,46 @@ router.get('/estado', authMiddleware, async (req, res) => {
         });
     }
 });
+// ============================================
+// ENDPOINT PARA ACTUALIZAR REFRESH TOKEN (FRONTEND)
+// ============================================
+router.post('/actualizar-refresh-token', authMiddleware, async (req, res) => {
+    try {
+        const { refresh_token } = req.body;
+        const usuario_id = req.userId;
+        const email = req.user.email;
+        
+        if (!refresh_token) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'refresh_token requerido' 
+            });
+        }
+        
+        console.log(`🔄 Actualizando refresh_token para: ${email}`);
+        
+        const { error } = await supabaseAdmin
+            .from('usuarios_automatizacion')
+            .upsert({
+                usuario_id: usuario_id,
+                email: email,
+                refresh_token: refresh_token,
+                recordatorios_activos: true,
+                updated_at: new Date().toISOString()
+            }, {
+                onConflict: 'usuario_id'
+            });
+        
+        if (error) throw error;
+        
+        console.log(`✅ Refresh token actualizado para: ${email}`);
+        res.json({ success: true, message: 'Refresh token actualizado' });
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 // ============================================
 // ENDPOINT PARA N8N - Health check
