@@ -4,7 +4,7 @@ const { supabaseAdmin } = require('../config/supabase');
 const authMiddleware = require('../middleware/auth');
 
 // ============================================
-// ENDPOINT PARA N8N - Obtener token usando refresh_token
+// ENDPOINT PARA N8N - Obtener token usando email/password
 // ============================================
 router.post('/token-usuario', async (req, res) => {
     try {
@@ -19,65 +19,38 @@ router.post('/token-usuario', async (req, res) => {
         console.log(`🔑 Buscando usuario: ${usuario_id}`);
         
         // Buscar el usuario en la tabla
-        let { data: usuario, error: dbError } = await supabaseAdmin
+        const { data: usuario, error: dbError } = await supabaseAdmin
             .from('usuarios_automatizacion')
-            .select('refresh_token, email')
+            .select('email, password')
             .eq('usuario_id', usuario_id)
             .single();
         
-        // Si no existe, intentar obtener desde auth.users
         if (dbError || !usuario) {
-            console.log(`⚠️ Usuario ${usuario_id} no encontrado en tabla, buscando en auth...`);
-            
-            // Obtener usuario de auth
-            const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(usuario_id);
-            
-            
-            if (authError || !authUser?.user) {
-                console.log(`❌ Usuario no encontrado: ${usuario_id}`);
-                return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
-            }
-            
-            // Crear registro automáticamente
-            console.log(`✅ Usuario encontrado en auth, creando registro: ${authUser.user.email}`);
-            
-            const { error: insertError } = await supabaseAdmin
-                .from('usuarios_automatizacion')
-                .insert({
-                    usuario_id: usuario_id,
-                    email: authUser.user.email,
-                    recordatorios_activos: true,
-                    created_at: new Date().toISOString()
-                });
-            
-            if (insertError) {
-                console.log(`⚠️ Error creando registro: ${insertError.message}`);
-            }
-            
-            // Como no tiene refresh_token, no podemos continuar
+            console.log(`❌ Usuario no encontrado: ${usuario_id}`);
+            return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+        }
+        
+        if (!usuario.email || !usuario.password) {
+            console.log(`❌ Usuario sin credenciales: ${usuario_id}`);
             return res.status(400).json({ 
                 success: false, 
-                error: 'El usuario debe iniciar sesión para activar recordatorios' 
+                error: 'Usuario no tiene credenciales configuradas' 
             });
         }
         
-        if (!usuario.refresh_token) {
-            console.log(`❌ Usuario sin refresh_token: ${usuario_id}`);
-            return res.status(400).json({ 
-                success: false, 
-                error: 'El usuario debe iniciar sesión para activar recordatorios' 
-            });
-        }
+        console.log(`🔐 Autenticando a: ${usuario.email}`);
         
-        // Usar refresh_token para obtener nuevo access_token
-        const { data: session, error: tokenError } = await supabaseAdmin.auth
-            .refreshSession({ refresh_token: usuario.refresh_token });
+        // Usar email y password para obtener token directamente
+        const { data: auth, error: authError } = await supabaseAdmin.auth.signInWithPassword({
+            email: usuario.email,
+            password: usuario.password
+        });
         
-        if (tokenError || !session?.session) {
-            console.log(`❌ Error refrescando token: ${tokenError?.message}`);
+        if (authError || !auth?.session) {
+            console.log(`❌ Error autenticando: ${authError?.message}`);
             return res.status(401).json({ 
                 success: false, 
-                error: 'Error al refrescar el token' 
+                error: 'Credenciales inválidas' 
             });
         }
         
@@ -85,7 +58,8 @@ router.post('/token-usuario', async (req, res) => {
         
         res.json({
             success: true,
-            access_token: session.session.access_token,
+            access_token: auth.session.access_token,
+            refresh_token: auth.session.refresh_token,
             expires_in: 3600,
             email: usuario.email,
             usuario_id: usuario_id
@@ -98,57 +72,43 @@ router.post('/token-usuario', async (req, res) => {
 });
 
 // ============================================
-// ENDPOINT PARA FRONTEND - Guardar refresh_token
+// ENDPOINT PARA FRONTEND - Guardar credenciales
 // ============================================
-router.post('/guardar-refresh-token', authMiddleware, async (req, res) => {
+router.post('/guardar-credenciales', authMiddleware, async (req, res) => {
     try {
-        const { refresh_token } = req.body;
+        const { password } = req.body;
         const usuario_id = req.userId;
         const email = req.user.email;
         
-        if (!refresh_token) {
+        if (!password) {
             return res.status(400).json({ 
                 success: false, 
-                error: 'refresh_token requerido' 
+                error: 'password requerido' 
             });
         }
         
-        console.log(`💾 Guardando refresh_token para usuario: ${email}`);
+        console.log(`💾 Guardando credenciales para: ${email}`);
         
-        // Upsert: inserta o actualiza si ya existe
-        const { data, error } = await supabaseAdmin
+        const { error } = await supabaseAdmin
             .from('usuarios_automatizacion')
             .upsert({
                 usuario_id: usuario_id,
                 email: email,
-                refresh_token: refresh_token,
+                password: password,
                 recordatorios_activos: true,
                 updated_at: new Date().toISOString()
             }, {
                 onConflict: 'usuario_id'
             });
         
-        if (error) {
-            console.error('❌ Error guardando refresh_token:', error);
-            return res.status(500).json({ 
-                success: false, 
-                error: error.message 
-            });
-        }
+        if (error) throw error;
         
-        console.log(`✅ Refresh_token guardado para: ${email}`);
-        
-        res.json({
-            success: true,
-            message: 'Refresh token guardado correctamente'
-        });
+        console.log(`✅ Credenciales guardadas para: ${email}`);
+        res.json({ success: true, message: 'Credenciales guardadas correctamente' });
         
     } catch (error) {
-        console.error('❌ Error en guardar-refresh-token:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
+        console.error('❌ Error:', error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
@@ -157,39 +117,24 @@ router.post('/guardar-refresh-token', authMiddleware, async (req, res) => {
 // ============================================
 router.post('/configurar', authMiddleware, async (req, res) => {
     try {
-        const { activo, refresh_token } = req.body;
+        const { activo } = req.body;
         const usuario_id = req.userId;
         const email = req.user.email;
         
         console.log(`⚙️ Configurando recordatorios: usuario=${email}, activo=${activo}`);
         
-        const updateData = {
-            recordatorios_activos: activo !== false,
-            updated_at: new Date().toISOString()
-        };
-        
-        // Si viene refresh_token, actualizarlo también
-        if (refresh_token) {
-            updateData.refresh_token = refresh_token;
-        }
-        
-        const { data, error } = await supabaseAdmin
+        const { error } = await supabaseAdmin
             .from('usuarios_automatizacion')
             .upsert({
                 usuario_id: usuario_id,
                 email: email,
-                ...updateData
+                recordatorios_activos: activo !== false,
+                updated_at: new Date().toISOString()
             }, {
                 onConflict: 'usuario_id'
             });
         
-        if (error) {
-            console.error('❌ Error configurando recordatorios:', error);
-            return res.status(500).json({ 
-                success: false, 
-                error: error.message 
-            });
-        }
+        if (error) throw error;
         
         console.log(`✅ Recordatorios ${activo !== false ? 'activados' : 'desactivados'} para: ${email}`);
         
@@ -200,15 +145,12 @@ router.post('/configurar', authMiddleware, async (req, res) => {
         
     } catch (error) {
         console.error('❌ Error en configurar:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
 // ============================================
-// ENDPOINT PARA FRONTEND - Obtener estado de recordatorios
+// ENDPOINT PARA FRONTEND - Obtener estado
 // ============================================
 router.get('/estado', authMiddleware, async (req, res) => {
     try {
@@ -217,11 +159,10 @@ router.get('/estado', authMiddleware, async (req, res) => {
         
         const { data, error } = await supabaseAdmin
             .from('usuarios_automatizacion')
-            .select('recordatorios_activos, email, refresh_token')
+            .select('recordatorios_activos, email')
             .eq('usuario_id', usuario_id)
             .single();
         
-        // Si no hay registro, devolver estado por defecto
         if (error && error.code === 'PGRST116') {
             return res.json({
                 success: true,
@@ -233,13 +174,7 @@ router.get('/estado', authMiddleware, async (req, res) => {
             });
         }
         
-        if (error) {
-            console.error('❌ Error obteniendo estado:', error);
-            return res.status(500).json({ 
-                success: false, 
-                error: error.message 
-            });
-        }
+        if (error) throw error;
         
         res.json({
             success: true,
@@ -252,53 +187,10 @@ router.get('/estado', authMiddleware, async (req, res) => {
         
     } catch (error) {
         console.error('❌ Error en estado:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
-    }
-});
-// ============================================
-// ENDPOINT PARA GUARDAR/ACTUALIZAR REFRESH TOKEN
-// ============================================
-router.post('/actualizar-refresh-token', authMiddleware, async (req, res) => {
-    try {
-        const { refresh_token } = req.body;
-        const usuario_id = req.userId;
-        const email = req.user.email;
-        
-        if (!refresh_token) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'refresh_token requerido' 
-            });
-        }
-        
-        console.log(`🔄 Guardando refresh_token para: ${email} (${usuario_id})`);
-        
-        // UPSERT: inserta o actualiza automáticamente
-        const { error } = await supabaseAdmin
-            .from('usuarios_automatizacion')
-            .upsert({
-                usuario_id: usuario_id,
-                email: email,
-                refresh_token: refresh_token,
-                recordatorios_activos: true,
-                updated_at: new Date().toISOString()
-            }, {
-                onConflict: 'usuario_id'
-            });
-        
-        if (error) throw error;
-        
-        console.log(`✅ Refresh token guardado para: ${email}`);
-        res.json({ success: true, message: 'Refresh token actualizado' });
-        
-    } catch (error) {
-        console.error('❌ Error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
 // ============================================
 // ENDPOINT PARA N8N - Health check
 // ============================================

@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { SupabaseService, Usuario, AuthResponse } from './supabase.service';
-import { RecordatoriosService } from './recordatorios.service';  // ✅ AGREGAR
+import { RecordatoriosService } from './recordatorios.service';
 
 export interface LoginCredentials {
   email: string;
@@ -27,7 +27,7 @@ export class AuthService {
   constructor(
     private supabaseService: SupabaseService,
     private router: Router,
-    private recordatoriosService: RecordatoriosService  // ✅ AGREGAR
+    private recordatoriosService: RecordatoriosService
   ) {
     this.currentUserSubject = new BehaviorSubject<Usuario | null>(
       this.getUserFromStorage()
@@ -58,7 +58,7 @@ export class AuthService {
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     return from(this.supabaseService.login(credentials.email, credentials.password)).pipe(
-      tap(async (response) => {  // ✅ Cambiar a async
+      tap(async (response) => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
           localStorage.setItem('user', JSON.stringify(response.user));
@@ -67,15 +67,12 @@ export class AuthService {
           }
           this.currentUserSubject.next(response.user);
           
-          // ✅ ACTIVAR RECORDATORIOS AUTOMÁTICAMENTE
-          const refreshToken = localStorage.getItem('refresh_token');
-          if (refreshToken) {
-            try {
-              await this.recordatoriosService.guardarRefreshToken(refreshToken);
-              console.log('✅ Recordatorios activados automáticamente');
-            } catch (e) {
-              console.warn('⚠️ Error activando recordatorios:', e);
-            }
+          // ✅ ACTIVAR RECORDATORIOS con la contraseña
+          try {
+            await this.recordatoriosService.guardarCredenciales(credentials.password);
+            console.log('✅ Recordatorios activados automáticamente');
+          } catch (e) {
+            console.warn('⚠️ Error activando recordatorios:', e);
           }
         }
       }),
@@ -93,7 +90,7 @@ export class AuthService {
     };
     
     return from(this.supabaseService.register(data.email, data.password, metadata)).pipe(
-      tap(async (response) => {  // ✅ Cambiar a async
+      tap(async (response) => {
         if (response && response.token) {
           localStorage.setItem('token', response.token);
           localStorage.setItem('user', JSON.stringify(response.user));
@@ -102,15 +99,12 @@ export class AuthService {
           }
           this.currentUserSubject.next(response.user);
           
-          // ✅ ACTIVAR RECORDATORIOS AUTOMÁTICAMENTE
-          const refreshToken = localStorage.getItem('refresh_token');
-          if (refreshToken) {
-            try {
-              await this.recordatoriosService.guardarRefreshToken(refreshToken);
-              console.log('✅ Recordatorios activados automáticamente');
-            } catch (e) {
-              console.warn('⚠️ Error activando recordatorios:', e);
-            }
+          // ✅ ACTIVAR RECORDATORIOS con la contraseña
+          try {
+            await this.recordatoriosService.guardarCredenciales(data.password);
+            console.log('✅ Recordatorios activados automáticamente');
+          } catch (e) {
+            console.warn('⚠️ Error activando recordatorios:', e);
           }
         }
       }),
