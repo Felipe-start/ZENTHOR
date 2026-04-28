@@ -12,6 +12,7 @@ export interface Usuario {
 
 export interface AuthResponse {
   token: string;
+  refresh_token?: string;  // ✅ AGREGAR
   user: Usuario;
 }
 
@@ -55,8 +56,10 @@ export class SupabaseService {
     }
     
     const token = data.session.access_token;
+    const refresh_token = data.session.refresh_token;  // ✅ AGREGAR
     
     localStorage.setItem('token', token);
+    localStorage.setItem('refresh_token', refresh_token);  // ✅ AGREGAR
     localStorage.setItem('supabase-auth-token', token);
     
     const user: Usuario = {
@@ -67,7 +70,7 @@ export class SupabaseService {
     };
     localStorage.setItem('user', JSON.stringify(user));
     
-    return { token, user };
+    return { token, refresh_token, user };  // ✅ MODIFICAR
   }
 
   async register(email: string, password: string, metadata: any): Promise<AuthResponse> {
@@ -84,8 +87,11 @@ export class SupabaseService {
     }
     
     const token = data.session?.access_token || '';
+    const refresh_token = data.session?.refresh_token || '';  // ✅ AGREGAR
+    
     if (token) {
       localStorage.setItem('token', token);
+      localStorage.setItem('refresh_token', refresh_token);  // ✅ AGREGAR
       localStorage.setItem('supabase-auth-token', token);
     }
     
@@ -100,7 +106,7 @@ export class SupabaseService {
       localStorage.setItem('user', JSON.stringify(user));
     }
     
-    return { token, user };
+    return { token, refresh_token, user };  // ✅ MODIFICAR
   }
 
   async resetPassword(email: string): Promise<{ success: boolean; message: string }> {
@@ -132,6 +138,7 @@ export class SupabaseService {
   async logout() {
     await this.supabase.auth.signOut();
     localStorage.removeItem('token');
+    localStorage.removeItem('refresh_token');  // ✅ AGREGAR
     localStorage.removeItem('supabase-auth-token');
     localStorage.removeItem('user');
   }

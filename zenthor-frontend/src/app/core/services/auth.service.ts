@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, from, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { SupabaseService, Usuario, AuthResponse } from './supabase.service';
+import { RecordatoriosService } from './recordatorios.service';  // ✅ AGREGAR
 
 export interface LoginCredentials {
   email: string;
@@ -25,7 +26,8 @@ export class AuthService {
 
   constructor(
     private supabaseService: SupabaseService,
-    private router: Router
+    private router: Router,
+    private recordatoriosService: RecordatoriosService  // ✅ AGREGAR
   ) {
     this.currentUserSubject = new BehaviorSubject<Usuario | null>(
       this.getUserFromStorage()
@@ -56,11 +58,25 @@ export class AuthService {
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     return from(this.supabaseService.login(credentials.email, credentials.password)).pipe(
-      tap(response => {
+      tap(async (response) => {  // ✅ Cambiar a async
         if (response && response.token) {
           localStorage.setItem('token', response.token);
           localStorage.setItem('user', JSON.stringify(response.user));
+          if (response.refresh_token) {
+            localStorage.setItem('refresh_token', response.refresh_token);
+          }
           this.currentUserSubject.next(response.user);
+          
+          // ✅ ACTIVAR RECORDATORIOS AUTOMÁTICAMENTE
+          const refreshToken = localStorage.getItem('refresh_token');
+          if (refreshToken) {
+            try {
+              await this.recordatoriosService.guardarRefreshToken(refreshToken);
+              console.log('✅ Recordatorios activados automáticamente');
+            } catch (e) {
+              console.warn('⚠️ Error activando recordatorios:', e);
+            }
+          }
         }
       }),
       catchError((error) => {
@@ -77,11 +93,25 @@ export class AuthService {
     };
     
     return from(this.supabaseService.register(data.email, data.password, metadata)).pipe(
-      tap(response => {
+      tap(async (response) => {  // ✅ Cambiar a async
         if (response && response.token) {
           localStorage.setItem('token', response.token);
           localStorage.setItem('user', JSON.stringify(response.user));
+          if (response.refresh_token) {
+            localStorage.setItem('refresh_token', response.refresh_token);
+          }
           this.currentUserSubject.next(response.user);
+          
+          // ✅ ACTIVAR RECORDATORIOS AUTOMÁTICAMENTE
+          const refreshToken = localStorage.getItem('refresh_token');
+          if (refreshToken) {
+            try {
+              await this.recordatoriosService.guardarRefreshToken(refreshToken);
+              console.log('✅ Recordatorios activados automáticamente');
+            } catch (e) {
+              console.warn('⚠️ Error activando recordatorios:', e);
+            }
+          }
         }
       }),
       catchError((error) => {
@@ -91,15 +121,13 @@ export class AuthService {
     );
   }
 
-async resetPassword(email: string): Promise<{ success: boolean; message: string }> {
-  return this.supabaseService.resetPassword(email);
-}
+  async resetPassword(email: string): Promise<{ success: boolean; message: string }> {
+    return this.supabaseService.resetPassword(email);
+  }
 
-  // 🔐 NUEVO: Actualizar contraseña
   async updatePassword(newPassword: string): Promise<{ success: boolean; message: string }> {
     const result = await this.supabaseService.updatePassword(newPassword);
     if (result.success) {
-      // Opcional: cerrar sesión para que el usuario inicie con la nueva contraseña
       this.logout();
     }
     return result;
@@ -108,6 +136,7 @@ async resetPassword(email: string): Promise<{ success: boolean; message: string 
   logout(): void {
     this.supabaseService.logout().catch(console.error);
     localStorage.removeItem('token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);

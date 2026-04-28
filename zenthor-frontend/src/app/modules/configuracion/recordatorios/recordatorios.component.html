@@ -1,0 +1,48 @@
+<div class="recordatorios-container">
+  <div class="card">
+    <div class="card-header">
+      <h2>🔔 Recordatorios Automáticos</h2>
+      <p>Recibe notificaciones por correo sobre tus tareas y exámenes</p>
+    </div>
+    
+    <div class="card-body" *ngIf="!cargando; else loading">
+      <div class="info-box">
+        <i class="fas fa-envelope"></i>
+        <div>
+          <strong>Correo de notificaciones:</strong>
+          <span>{{ email }}</span>
+          <small>Los recordatorios se enviarán a esta dirección</small>
+        </div>
+      </div>
+      
+      <form [formGroup]="recordatoriosForm">
+        <div class="toggle-switch">
+          <label class="switch">
+            <input type="checkbox" formControlName="activos" (change)="guardarConfiguracion()">
+            <span class="slider round"></span>
+          </label>
+          <div class="toggle-label">
+            <span class="toggle-title">Recordatorios automáticos</span>
+            <span class="toggle-description">
+              Al activar esta opción, recibirás:
+              <ul>
+                <li>📅 <strong>7 días antes</strong> - "Faltan 7 días para la entrega"</li>
+                <li>📆 <strong>3 días antes</strong> - "Faltan 3 días para la entrega"</li>
+                <li>⏰ <strong>24 horas antes</strong> - "¡Mañana es la fecha de entrega!"</li>
+                <li>⚠️ <strong>1 hora antes</strong> - "Vence en 1 hora"</li>
+                <li>🔴 <strong>30 minutos antes</strong> - "¡URGENTE! Vence en 30 minutos"</li>
+              </ul>
+            </span>
+          </div>
+        </div>
+      </form>
+    </div>
+    
+    <ng-template #loading>
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Cargando configuración...</p>
+      </div>
+    </ng-template>
+  </div>
+</div>
