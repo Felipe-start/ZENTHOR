@@ -10,33 +10,54 @@ router.post('/token-usuario', async (req, res) => {
     try {
         const { usuario_id } = req.body;
         const masterKey = req.headers['x-master-key'];
-        
-        // Clave maestra desde variable de entorno
         const N8N_MASTER_KEY = process.env.N8N_MASTER_KEY || 'Z3n7h0r_M45t3r_K3y_2026';
         
-        // Verificar que la petición viene de n8n
         if (masterKey !== N8N_MASTER_KEY) {
-            console.log('❌ Intento no autorizado a token-usuario');
-            return res.status(401).json({ 
-                success: false, 
-                error: 'No autorizado' 
-            });
+            return res.status(401).json({ success: false, error: 'No autorizado' });
         }
         
-        console.log(`🔑 Solicitando token para usuario: ${usuario_id}`);
+        console.log(`🔑 Buscando usuario: ${usuario_id}`);
         
-        // Obtener el refresh_token del usuario desde la base de datos
-        const { data: usuario, error: dbError } = await supabaseAdmin
+        // Buscar el usuario en la tabla
+        let { data: usuario, error: dbError } = await supabaseAdmin
             .from('usuarios_automatizacion')
             .select('refresh_token, email')
             .eq('usuario_id', usuario_id)
             .single();
         
+        // Si no existe, intentar obtener desde auth.users
         if (dbError || !usuario) {
-            console.log(`❌ Usuario no encontrado: ${usuario_id}`);
-            return res.status(404).json({ 
+            console.log(`⚠️ Usuario ${usuario_id} no encontrado en tabla, buscando en auth...`);
+            
+            // Obtener usuario de auth
+            const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.getUserById(usuario_id);
+            
+            
+            if (authError || !authUser?.user) {
+                console.log(`❌ Usuario no encontrado: ${usuario_id}`);
+                return res.status(404).json({ success: false, error: 'Usuario no encontrado' });
+            }
+            
+            // Crear registro automáticamente
+            console.log(`✅ Usuario encontrado en auth, creando registro: ${authUser.user.email}`);
+            
+            const { error: insertError } = await supabaseAdmin
+                .from('usuarios_automatizacion')
+                .insert({
+                    usuario_id: usuario_id,
+                    email: authUser.user.email,
+                    recordatorios_activos: true,
+                    created_at: new Date().toISOString()
+                });
+            
+            if (insertError) {
+                console.log(`⚠️ Error creando registro: ${insertError.message}`);
+            }
+            
+            // Como no tiene refresh_token, no podemos continuar
+            return res.status(400).json({ 
                 success: false, 
-                error: 'Usuario no encontrado' 
+                error: 'El usuario debe iniciar sesión para activar recordatorios' 
             });
         }
         
@@ -44,11 +65,11 @@ router.post('/token-usuario', async (req, res) => {
             console.log(`❌ Usuario sin refresh_token: ${usuario_id}`);
             return res.status(400).json({ 
                 success: false, 
-                error: 'Usuario no tiene refresh token configurado' 
+                error: 'El usuario debe iniciar sesión para activar recordatorios' 
             });
         }
         
-        // Usar refresh_token para obtener un nuevo access_token
+        // Usar refresh_token para obtener nuevo access_token
         const { data: session, error: tokenError } = await supabaseAdmin.auth
             .refreshSession({ refresh_token: usuario.refresh_token });
         
@@ -72,10 +93,7 @@ router.post('/token-usuario', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Error en token-usuario:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
@@ -241,7 +259,7 @@ router.get('/estado', authMiddleware, async (req, res) => {
     }
 });
 // ============================================
-// ENDPOINT PARA ACTUALIZAR REFRESH TOKEN (FRONTEND)
+// ENDPOINT PARA GUARDAR/ACTUALIZAR REFRESH TOKEN
 // ============================================
 router.post('/actualizar-refresh-token', authMiddleware, async (req, res) => {
     try {
@@ -256,8 +274,9 @@ router.post('/actualizar-refresh-token', authMiddleware, async (req, res) => {
             });
         }
         
-        console.log(`🔄 Actualizando refresh_token para: ${email}`);
+        console.log(`🔄 Guardando refresh_token para: ${email} (${usuario_id})`);
         
+        // UPSERT: inserta o actualiza automáticamente
         const { error } = await supabaseAdmin
             .from('usuarios_automatizacion')
             .upsert({
@@ -272,7 +291,7 @@ router.post('/actualizar-refresh-token', authMiddleware, async (req, res) => {
         
         if (error) throw error;
         
-        console.log(`✅ Refresh token actualizado para: ${email}`);
+        console.log(`✅ Refresh token guardado para: ${email}`);
         res.json({ success: true, message: 'Refresh token actualizado' });
         
     } catch (error) {
@@ -280,7 +299,6 @@ router.post('/actualizar-refresh-token', authMiddleware, async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
-
 // ============================================
 // ENDPOINT PARA N8N - Health check
 // ============================================
