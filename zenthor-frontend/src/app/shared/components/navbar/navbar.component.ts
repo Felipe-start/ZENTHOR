@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
     <nav class="navbar" [class.menu-open]="mobileMenuOpen">
       <div class="navbar-brand">
         <div class="logo-container" routerLink="/dashboard">
-          <img src="assets/images/LOGO Z.jpg" alt="ZENTHOR" class="logo-img" (error)="handleImageError($event)">
+          <img src="assets/images/ LOGO Z.jpg" alt="ZENTHOR" class="logo-img" (error)="handleImageError($event)">
           <span class="brand-name">ZENTHOR</span>
         </div>
         <button class="mobile-menu-btn" (click)="toggleMobileMenu()" aria-label="Menú">
@@ -466,7 +466,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   handleImageError(event: any) {
-    event.target.src = 'https://via.placeholder.com/45x45?text=Z';
+    event.target.src = '';
   }
 
   getUserInitials(): string {

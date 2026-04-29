@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-brand">
-          <img src="assets/images/LOGO.jpg" alt="ZENTHOR" class="footer-logo" (error)="handleImageError($event)">
+          <img src="assets/images/ LOGO.jpg" alt="ZENTHOR" class="footer-logo" (error)="handleImageError($event)">
           <span>ZENTHOR</span>
         </div>
         <p>&copy; {{ currentYear }} ZENTHOR. Todos los derechos reservados.</p>
