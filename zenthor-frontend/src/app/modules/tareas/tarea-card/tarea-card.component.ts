@@ -59,11 +59,15 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
     </div>
   `,
   styles: [`
+    /* ============================================
+       TAREA-CARD - Fully Responsive Styles
+       ============================================ */
+    
     .tarea-card {
       background: white;
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 16px;
+      border-radius: clamp(1rem, 4vw, 1.25rem);
+      padding: clamp(1rem, 4vw, 1.25rem);
+      margin-bottom: 1rem;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border: 1px solid #f0f0f0;
@@ -97,25 +101,30 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
       background: linear-gradient(135deg, #f9fafb, #f3f4f6);
     }
     
+    /* Header */
     .tarea-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 12px;
+      margin-bottom: 0.75rem;
+      gap: 0.75rem;
+      flex-wrap: wrap;
     }
     
     .tarea-titulo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 0.75rem;
       flex-wrap: wrap;
       flex: 1;
+      min-width: 0;
     }
     
     .priority-indicator {
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
+      flex-shrink: 0;
     }
     
     .priority-indicator.alta {
@@ -135,9 +144,11 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
     
     .tarea-titulo h4 {
       margin: 0;
-      font-size: 1rem;
+      font-size: clamp(0.875rem, 4vw, 1rem);
       font-weight: 600;
       color: #1f2937;
+      word-break: break-word;
+      flex: 1;
     }
     
     .tachado {
@@ -148,11 +159,12 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
     .prioridad-badge {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
+      gap: 0.375rem;
+      padding: 0.25rem 0.75rem;
       border-radius: 20px;
-      font-size: 0.7rem;
+      font-size: clamp(0.625rem, 2.5vw, 0.7rem);
       font-weight: 600;
+      flex-shrink: 0;
     }
     
     .prioridad-badge.alta {
@@ -170,20 +182,25 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
       color: #10b981;
     }
     
+    /* Actions */
     .tarea-actions {
       display: flex;
-      gap: 8px;
+      gap: 0.5rem;
+      flex-shrink: 0;
     }
     
     .btn-icon {
-      width: 32px;
-      height: 32px;
+      width: clamp(32px, 8vw, 36px);
+      height: clamp(32px, 8vw, 36px);
       background: none;
       border: none;
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.2s ease;
       color: #9ca3af;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .btn-icon.edit:hover {
@@ -198,52 +215,60 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
       transform: scale(1.05);
     }
     
+    /* Materia */
     .tarea-materia {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
+      gap: 0.5rem;
+      padding: 0.375rem 0.875rem;
       border-radius: 20px;
-      font-size: 0.75rem;
+      font-size: clamp(0.688rem, 2.5vw, 0.75rem);
       font-weight: 500;
-      margin-bottom: 12px;
+      margin-bottom: 0.75rem;
+      transition: all 0.2s;
     }
     
+    /* Descripción */
     .tarea-descripcion {
-      margin: 12px 0;
-      padding: 12px;
+      margin: 0.75rem 0;
+      padding: clamp(0.75rem, 3vw, 1rem);
       background: #f9fafb;
-      border-radius: 14px;
+      border-radius: clamp(0.75rem, 3vw, 1rem);
       display: flex;
-      gap: 10px;
+      gap: 0.625rem;
     }
     
     .tarea-descripcion i {
       color: #9ca3af;
-      margin-top: 2px;
+      margin-top: 0.125rem;
+      flex-shrink: 0;
     }
     
     .tarea-descripcion p {
       margin: 0;
-      font-size: 0.85rem;
+      font-size: clamp(0.75rem, 3vw, 0.85rem);
       color: #4b5563;
       line-height: 1.5;
+      word-break: break-word;
     }
     
+    /* Footer */
     .tarea-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 16px;
-      padding-top: 12px;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
       border-top: 1px solid #f0f0f0;
+      flex-wrap: wrap;
+      gap: 0.75rem;
     }
     
     .fecha-entrega {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.8rem;
+      gap: 0.5rem;
+      font-size: clamp(0.688rem, 2.5vw, 0.8rem);
       color: #6b7280;
     }
     
@@ -255,16 +280,17 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
     .btn-completar {
       background: linear-gradient(135deg, #10b981, #059669);
       border: none;
-      padding: 8px 18px;
+      padding: 0.5rem 1rem;
       border-radius: 30px;
       color: white;
-      font-size: 0.75rem;
+      font-size: clamp(0.688rem, 2.5vw, 0.75rem);
       font-weight: 500;
       cursor: pointer;
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.5rem;
+      min-height: 40px;
     }
     
     .btn-completar:hover {
@@ -275,28 +301,58 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
     .completada-badge {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.5rem;
       color: #10b981;
       font-weight: 500;
-      font-size: 0.8rem;
+      font-size: clamp(0.688rem, 2.5vw, 0.8rem);
       background: #dcfce7;
-      padding: 6px 14px;
+      padding: 0.375rem 0.875rem;
       border-radius: 30px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 640px) {
+      .tarea-footer {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .btn-completar {
+        justify-content: center;
+      }
+      
+      .completada-badge {
+        justify-content: center;
+      }
+      
+      .tarea-header {
+        flex-direction: column;
+      }
+      
+      .tarea-actions {
+        align-self: flex-end;
+      }
     }
     
     @media (max-width: 480px) {
       .tarea-card {
-        padding: 16px;
+        padding: 0.875rem;
       }
       
-      .tarea-footer {
+      .tarea-titulo {
         flex-direction: column;
-        gap: 12px;
         align-items: flex-start;
       }
+    }
+    
+    /* Touch-friendly */
+    @media (hover: none) and (pointer: coarse) {
+      .btn-icon:active {
+        transform: scale(0.95);
+      }
       
-      .tarea-actions {
-        flex-direction: column;
+      .btn-completar:active {
+        transform: scale(0.98);
       }
     }
   `]

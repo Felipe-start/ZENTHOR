@@ -12,13 +12,13 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
   template: `
     <div class="materias-container">
       <div class="page-header">
-        <div>
+        <div class="header-title">
           <h1>Mis Materias</h1>
           <p>Gestiona todas tus materias académicas</p>
         </div>
         <button class="btn-primary" (click)="abrirFormulario()">
           <i class="fas fa-plus"></i>
-          Nueva Materia
+          <span>Nueva Materia</span>
         </button>
       </div>
 
@@ -91,7 +91,7 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
           <form [formGroup]="materiaForm" (ngSubmit)="guardarMateria()">
             <div class="form-group">
               <label>Nombre de la materia *</label>
-              <input type="text" formControlName="nombre" placeholder="Ej: Matemáticas">
+              <input type="text" formControlName="nombre" placeholder="Ej: Matemáticas" [class.is-invalid]="materiaForm.get('nombre')?.invalid && materiaForm.get('nombre')?.touched">
               <div class="error" *ngIf="materiaForm.get('nombre')?.invalid && materiaForm.get('nombre')?.touched">
                 El nombre es requerido
               </div>
@@ -124,148 +124,221 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
     </div>
   `,
   styles: [`
+    /* ============================================
+       MATERIAS-LIST - Fully Responsive Styles
+       ============================================ */
+    
     .materias-container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 20px;
+      padding: clamp(0.75rem, 4vw, 1.25rem);
     }
+    
+    /* Page Header */
     .page-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 32px;
+      margin-bottom: clamp(1.5rem, 5vw, 2rem);
+      flex-wrap: wrap;
+      gap: 1rem;
     }
-    .page-header h1 {
-      font-size: 2rem;
+    
+    .header-title h1 {
+      font-size: clamp(1.25rem, 5vw, 2rem);
       font-weight: 700;
-      margin: 0 0 8px 0;
-      color: #2c3e50;
+      margin: 0 0 0.25rem 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .page-header p {
+    
+    .header-title p {
       margin: 0;
       color: #718096;
+      font-size: clamp(0.75rem, 3vw, 0.875rem);
     }
+    
+    /* Botón Primario */
     .btn-primary {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       border: none;
-      padding: 12px 24px;
-      border-radius: 12px;
+      padding: clamp(0.625rem, 2.5vw, 0.75rem) clamp(1rem, 4vw, 1.5rem);
+      border-radius: clamp(0.75rem, 3vw, 1rem);
       color: white;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s;
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.5rem;
+      font-size: clamp(0.75rem, 3vw, 0.875rem);
+      min-height: 44px;
     }
+    
     .btn-primary:hover {
       transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
     }
+    
+    /* Loading */
     .loading-container {
       text-align: center;
-      padding: 60px;
+      padding: clamp(2rem, 10vw, 3.75rem);
     }
+    
     .spinner {
-      width: 50px;
-      height: 50px;
+      width: clamp(2rem, 8vw, 3rem);
+      height: clamp(2rem, 8vw, 3rem);
       border: 4px solid #e0e0e0;
       border-top-color: #667eea;
       border-radius: 50%;
       animation: spin 1s linear infinite;
-      margin: 0 auto 16px;
+      margin: 0 auto 1rem;
     }
+    
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    
+    /* Grid de materias - Responsive */
     .materias-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+      gap: clamp(1rem, 4vw, 1.5rem);
     }
+    
+    /* Materia Card */
     .materia-card {
       background: white;
-      border-radius: 16px;
-      padding: 20px;
+      border-radius: clamp(1rem, 4vw, 1.25rem);
+      padding: clamp(1rem, 4vw, 1.25rem);
       border-top: 4px solid;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       transition: all 0.3s ease;
       cursor: pointer;
     }
+    
     .materia-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.12);
     }
+    
     .materia-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 16px;
+      margin-bottom: 1rem;
+      gap: 0.5rem;
+      flex-wrap: wrap;
     }
+    
     .materia-info {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 0.75rem;
       flex: 1;
+      min-width: 0;
     }
+    
     .materia-color {
       width: 12px;
       height: 12px;
       border-radius: 50%;
+      flex-shrink: 0;
     }
+    
     .materia-info h3 {
       margin: 0;
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 4vw, 1.1rem);
       font-weight: 600;
       color: #2c3e50;
+      word-break: break-word;
     }
+    
     .materia-actions {
       display: flex;
-      gap: 8px;
+      gap: 0.5rem;
+      flex-shrink: 0;
     }
+    
     .btn-icon {
       background: none;
       border: none;
       cursor: pointer;
       color: #95a5a6;
-      transition: color 0.2s;
-      padding: 4px;
+      transition: all 0.2s;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      min-width: 36px;
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+    
     .btn-icon:hover {
+      background: #f0f0f0;
       color: #667eea;
     }
+    
+    /* Materia Details */
     .materia-details {
-      margin: 16px 0;
-      padding: 12px;
+      margin: 1rem 0;
+      padding: clamp(0.75rem, 3vw, 1rem);
       background: #f8f9fa;
-      border-radius: 12px;
+      border-radius: clamp(0.75rem, 3vw, 1rem);
     }
+    
     .detail-item {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
+      gap: 0.5rem;
+      font-size: clamp(0.75rem, 3vw, 0.85rem);
       color: #4a5568;
-      margin-bottom: 8px;
+      margin-bottom: 0.5rem;
     }
+    
     .detail-item:last-child {
       margin-bottom: 0;
     }
+    
+    .detail-item i {
+      width: 1.25rem;
+      flex-shrink: 0;
+    }
+    
+    .detail-item span {
+      word-break: break-word;
+    }
+    
+    /* Materia Stats */
     .materia-stats {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 16px;
-      padding-top: 16px;
+      margin-top: 1rem;
+      padding-top: 1rem;
       border-top: 1px solid #eef2f6;
+      flex-wrap: wrap;
+      gap: 0.75rem;
     }
+    
     .stat {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
+      gap: 0.5rem;
+      font-size: clamp(0.75rem, 3vw, 0.85rem);
       color: #667eea;
       cursor: pointer;
+      padding: 0.25rem 0;
     }
+    
+    .stat i {
+      font-size: 1rem;
+    }
+    
     .btn-stats {
       background: none;
       border: none;
@@ -274,20 +347,44 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 0.25rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 2rem;
+      transition: all 0.2s;
+      font-size: clamp(0.75rem, 3vw, 0.85rem);
     }
+    
+    .btn-stats:hover {
+      background: #f0f4ff;
+    }
+    
+    /* Empty State */
     .empty-state {
       grid-column: 1 / -1;
       text-align: center;
-      padding: 60px;
+      padding: clamp(2rem, 10vw, 3.75rem);
       background: white;
-      border-radius: 20px;
+      border-radius: clamp(1rem, 5vw, 1.5rem);
     }
+    
     .empty-state i {
-      font-size: 64px;
+      font-size: clamp(3rem, 12vw, 4rem);
       color: #cbd5e0;
-      margin-bottom: 20px;
+      margin-bottom: 1rem;
     }
+    
+    .empty-state h3 {
+      margin: 0 0 0.5rem;
+      font-size: clamp(1rem, 4vw, 1.25rem);
+    }
+    
+    .empty-state p {
+      color: #718096;
+      margin-bottom: 1.5rem;
+      font-size: clamp(0.75rem, 3vw, 0.875rem);
+    }
+    
+    /* Modal Responsive */
     .modal {
       display: none;
       position: fixed;
@@ -299,89 +396,194 @@ import { TareaWithMateria } from '../../../core/models/tarea.model';
       z-index: 1000;
       align-items: center;
       justify-content: center;
+      padding: 1rem;
     }
+    
     .modal.show {
       display: flex;
     }
+    
     .modal-content {
       background: white;
-      border-radius: 24px;
+      border-radius: clamp(1rem, 5vw, 1.5rem);
       width: 90%;
       max-width: 500px;
       max-height: 90vh;
       overflow-y: auto;
+      animation: modalSlideIn 0.3s ease;
     }
+    
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px 24px;
+      padding: clamp(1rem, 4vw, 1.25rem) clamp(1rem, 4vw, 1.5rem);
       border-bottom: 1px solid #eef2f6;
     }
+    
     .modal-header h2 {
       margin: 0;
-      font-size: 1.5rem;
+      font-size: clamp(1.125rem, 4.5vw, 1.5rem);
     }
+    
     .close-btn {
       background: none;
       border: none;
-      font-size: 28px;
+      font-size: 1.75rem;
       cursor: pointer;
       color: #95a5a6;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s;
     }
+    
+    .close-btn:hover {
+      background: #f0f0f0;
+      color: #667eea;
+    }
+    
     .modal-body {
-      padding: 24px;
+      padding: clamp(1rem, 4vw, 1.5rem);
     }
+    
+    /* Formulario */
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: clamp(1rem, 4vw, 1.25rem);
     }
+    
     .form-group label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 0.5rem;
       font-weight: 500;
       color: #2c3e50;
+      font-size: clamp(0.75rem, 3vw, 0.875rem);
     }
+    
     .form-group input {
       width: 100%;
-      padding: 10px 12px;
+      padding: clamp(0.625rem, 2.5vw, 0.75rem) clamp(0.75rem, 3vw, 1rem);
       border: 2px solid #e0e0e0;
-      border-radius: 10px;
-      font-size: 14px;
+      border-radius: clamp(0.5rem, 2.5vw, 0.75rem);
+      font-size: clamp(0.813rem, 3vw, 0.875rem);
+      transition: all 0.2s;
+      font-family: inherit;
     }
+    
     .form-group input:focus {
       outline: none;
       border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
+    
+    .form-group input.is-invalid {
+      border-color: #dc2626;
+    }
+    
     .form-group input[type="color"] {
       height: 50px;
       cursor: pointer;
+      padding: 0.25rem;
     }
+    
     .error {
       color: #dc2626;
-      font-size: 0.8rem;
-      margin-top: 4px;
+      font-size: clamp(0.688rem, 2.5vw, 0.75rem);
+      margin-top: 0.25rem;
     }
+    
     .form-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 12px;
-      margin-top: 24px;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
     }
+    
     .btn-secondary {
       background: white;
       border: 2px solid #e0e0e0;
-      padding: 10px 20px;
-      border-radius: 10px;
+      padding: clamp(0.625rem, 2.5vw, 0.75rem) clamp(1rem, 4vw, 1.25rem);
+      border-radius: clamp(0.5rem, 2.5vw, 0.75rem);
       cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      font-size: clamp(0.75rem, 3vw, 0.875rem);
+      min-height: 44px;
     }
+    
+    .btn-secondary:hover {
+      background: #f8f9fa;
+      border-color: #667eea;
+    }
+    
+    /* Responsive Breakpoints */
     @media (max-width: 768px) {
+      .page-header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .btn-primary {
+        justify-content: center;
+      }
+    }
+    
+    @media (max-width: 640px) {
       .materias-grid {
         grid-template-columns: 1fr;
       }
-      .page-header {
+      
+      .materia-stats {
         flex-direction: column;
-        gap: 16px;
-        align-items: flex-start;
+        align-items: stretch;
+      }
+      
+      .btn-stats {
+        justify-content: center;
+      }
+      
+      .stat {
+        justify-content: center;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .materia-header {
+        flex-direction: column;
+      }
+      
+      .materia-actions {
+        align-self: flex-end;
+      }
+      
+      .modal-content {
+        width: 95%;
+      }
+    }
+    
+    /* Touch-friendly */
+    @media (hover: none) and (pointer: coarse) {
+      .btn-icon:active {
+        background: #f0f0f0;
+      }
+      
+      .btn-primary:active {
+        transform: scale(0.98);
       }
     }
   `]
@@ -432,37 +634,33 @@ export class MateriasListComponent implements OnInit {
     });
   }
 
-cargarTareasPorMateria() {
-  this.tareasService.getTareas({ estado: 'pendiente' }).subscribe({
-    next: (response: any) => {
-      // Verificar si response es un array o tiene una propiedad data
-      let tareas: any[] = [];
-      if (Array.isArray(response)) {
-        tareas = response;
-      } else if (response && response.data && Array.isArray(response.data)) {
-        tareas = response.data;
-      } else if (response && response.tareas && Array.isArray(response.tareas)) {
-        tareas = response.tareas;
-      } else {
-        console.error('Formato de respuesta inesperado:', response);
-        tareas = [];
+  cargarTareasPorMateria() {
+    this.tareasService.getTareas({ estado: 'pendiente' }).subscribe({
+      next: (response: any) => {
+        let tareas: any[] = [];
+        if (Array.isArray(response)) {
+          tareas = response;
+        } else if (response && response.data && Array.isArray(response.data)) {
+          tareas = response.data;
+        } else if (response && response.tareas && Array.isArray(response.tareas)) {
+          tareas = response.tareas;
+        } else {
+          tareas = [];
+        }
+        
+        this.tareasPorMateria.clear();
+        tareas.forEach((tarea: any) => {
+          const count = this.tareasPorMateria.get(tarea.materia_id) || 0;
+          this.tareasPorMateria.set(tarea.materia_id, count + 1);
+        });
+        this.cargando = false;
+      },
+      error: (error: any) => {
+        console.error('Error cargando tareas:', error);
+        this.cargando = false;
       }
-      
-      // Contar tareas pendientes por materia
-      this.tareasPorMateria.clear();
-      tareas.forEach((tarea: any) => {
-        const count = this.tareasPorMateria.get(tarea.materia_id) || 0;
-        this.tareasPorMateria.set(tarea.materia_id, count + 1);
-      });
-      this.cargando = false;
-    },
-    error: (error: any) => {
-      console.error('Error cargando tareas:', error);
-      this.cargando = false;
-    }
-  });
-}
-
+    });
+  }
 
   obtenerTareasPendientes(materiaId: number): number {
     return this.tareasPorMateria.get(materiaId) || 0;

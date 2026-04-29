@@ -1,13 +1,16 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
   template: `
-    <aside class="sidebar" [class.collapsed]="isCollapsed">
+    <aside class="sidebar" [class.collapsed]="isCollapsed" [class.open]="mobileOpen">
+      <!-- Overlay para móvil -->
+      <div class="sidebar-overlay" *ngIf="mobileOpen" (click)="closeMobile()"></div>
+      
       <div class="sidebar-header">
         <div class="logo-wrapper" (click)="toggleSidebar()">
-          <img src="assets/images/ LOGO Z.jpg" alt="ZENTHOR" class="sidebar-logo animate-float" (error)="handleImageError($event)">
+          <img src="assets/images/LOGO Z.jpg" alt="ZENTHOR" class="sidebar-logo animate-float" (error)="handleImageError($event)">
           <h2 class="logo-text" *ngIf="!isCollapsed">ZENTHOR</h2>
         </div>
 
@@ -16,7 +19,7 @@ import { AuthService } from '../../../core/services/auth.service';
             {{ getUserInitials() }}
           </div>
           <div class="user-details">
-            <h4>{{ currentUser?.nombre_completo }}</h4>
+            <h4>{{ currentUser?.nombre_completo || 'Usuario' }}</h4>
             <p>{{ currentUser?.nivel_educativo || 'Estudiante' }}</p>
           </div>
         </div>
@@ -71,6 +74,10 @@ import { AuthService } from '../../../core/services/auth.service';
     </aside>
   `,
   styles: [`
+    /* ============================================
+       SIDEBAR - Fully Responsive Styles
+       ============================================ */
+    
     .sidebar {
       position: fixed;
       left: 0;
@@ -82,7 +89,7 @@ import { AuthService } from '../../../core/services/auth.service';
       display: flex;
       flex-direction: column;
       z-index: 99;
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
       overflow-x: hidden;
       overflow-y: auto;
     }
@@ -91,19 +98,32 @@ import { AuthService } from '../../../core/services/auth.service';
       width: 80px;
     }
     
+    /* Overlay para móvil */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+    }
+    
+    /* Sidebar Header */
     .sidebar-header {
-      padding: 24px;
+      padding: clamp(1rem, 4vw, 1.5rem);
       border-bottom: 1px solid #eef2f6;
       transition: all 0.3s ease;
     }
     
     .sidebar.collapsed .sidebar-header {
-      padding: 20px 12px;
+      padding: 1rem 0.75rem;
     }
     
     .logo-wrapper {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 1.5rem;
       cursor: pointer;
       transition: all 0.3s ease;
     }
@@ -113,35 +133,41 @@ import { AuthService } from '../../../core/services/auth.service';
     }
     
     .sidebar-logo {
-      width: 70px;
-      height: 70px;
-      border-radius: 18px;
+      width: clamp(50px, 12vw, 70px);
+      height: clamp(50px, 12vw, 70px);
+      border-radius: clamp(14px, 4vw, 18px);
       object-fit: cover;
-      margin-bottom: 12px;
+      margin-bottom: 0.75rem;
       box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2);
       transition: all 0.3s ease;
     }
     
     .sidebar.collapsed .sidebar-logo {
-      width: 50px;
-      height: 50px;
+      width: 45px;
+      height: 45px;
       margin-bottom: 0;
     }
     
     .logo-text {
-      font-size: 1.25rem;
+      font-size: clamp(1rem, 4vw, 1.25rem);
       font-weight: 700;
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin: 0;
       transition: all 0.3s ease;
     }
     
+    .sidebar.collapsed .logo-text {
+      display: none;
+    }
+    
+    /* User Info */
     .user-info {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 1rem;
       animation: slideIn 0.3s ease;
     }
     
@@ -157,29 +183,30 @@ import { AuthService } from '../../../core/services/auth.service';
     }
     
     .user-avatar-lg {
-      width: 56px;
-      height: 56px;
+      width: clamp(48px, 12vw, 56px);
+      height: clamp(48px, 12vw, 56px);
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 20px;
+      font-size: clamp(1rem, 4vw, 1.25rem);
       font-weight: 600;
       transition: all 0.3s ease;
+      flex-shrink: 0;
     }
     
     .user-avatar-sm {
-      width: 48px;
-      height: 48px;
+      width: 45px;
+      height: 45px;
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 18px;
+      font-size: 1rem;
       font-weight: 600;
       margin: 0 auto;
       cursor: pointer;
@@ -191,36 +218,43 @@ import { AuthService } from '../../../core/services/auth.service';
       box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
     }
     
+    .user-details {
+      flex: 1;
+      min-width: 0;
+    }
+    
     .user-details h4 {
       margin: 0;
-      font-size: 16px;
+      font-size: clamp(0.875rem, 3.5vw, 1rem);
       font-weight: 600;
       color: #1f2937;
+      word-break: break-word;
     }
     
     .user-details p {
-      margin: 4px 0 0;
-      font-size: 12px;
+      margin: 0.25rem 0 0;
+      font-size: clamp(0.688rem, 2.5vw, 0.75rem);
       color: #6b7280;
     }
     
+    /* Sidebar Navigation */
     .sidebar-nav {
       flex: 1;
-      padding: 24px 16px;
+      padding: 1.5rem 1rem;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 0.5rem;
     }
     
     .sidebar.collapsed .sidebar-nav {
-      padding: 20px 8px;
+      padding: 1.25rem 0.5rem;
     }
     
     .nav-link {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
       color: #4b5563;
       text-decoration: none;
       border-radius: 14px;
@@ -249,7 +283,7 @@ import { AuthService } from '../../../core/services/auth.service';
     
     .nav-link i {
       width: 24px;
-      font-size: 18px;
+      font-size: clamp(1rem, 3.5vw, 1.125rem);
       position: relative;
       z-index: 1;
     }
@@ -257,6 +291,7 @@ import { AuthService } from '../../../core/services/auth.service';
     .nav-link span {
       position: relative;
       z-index: 1;
+      font-size: clamp(0.813rem, 3vw, 0.875rem);
     }
     
     .nav-link:hover {
@@ -273,30 +308,31 @@ import { AuthService } from '../../../core/services/auth.service';
     
     .sidebar.collapsed .nav-link {
       justify-content: center;
-      padding: 12px;
+      padding: 0.75rem;
     }
     
     .sidebar.collapsed .nav-link i {
       margin: 0;
     }
     
+    /* Sidebar Footer */
     .sidebar-footer {
-      padding: 24px;
+      padding: 1.5rem;
       border-top: 1px solid #eef2f6;
     }
     
     .progress-section {
       background: #f9fafb;
-      padding: 16px;
+      padding: 1rem;
       border-radius: 16px;
     }
     
     .progress-label {
       display: flex;
       justify-content: space-between;
-      font-size: 12px;
+      font-size: clamp(0.688rem, 2.5vw, 0.75rem);
       color: #4b5563;
-      margin-bottom: 10px;
+      margin-bottom: 0.625rem;
       font-weight: 500;
     }
     
@@ -331,6 +367,7 @@ import { AuthService } from '../../../core/services/auth.service';
       100% { transform: translateX(100%); }
     }
     
+    /* Sidebar Toggle */
     .sidebar-toggle {
       position: absolute;
       right: -12px;
@@ -356,6 +393,7 @@ import { AuthService } from '../../../core/services/auth.service';
       transform: translateY(-50%) scale(1.1);
     }
     
+    /* Animations */
     .animate-float {
       animation: float 3s ease-in-out infinite;
     }
@@ -365,6 +403,7 @@ import { AuthService } from '../../../core/services/auth.service';
       50% { transform: translateY(-5px); }
     }
     
+    /* Scrollbar */
     .sidebar::-webkit-scrollbar {
       width: 4px;
     }
@@ -378,19 +417,48 @@ import { AuthService } from '../../../core/services/auth.service';
       border-radius: 4px;
     }
     
+    /* Mobile Styles */
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
         width: 280px !important;
+        top: 60px;
+        height: calc(100vh - 60px);
+        z-index: 1000;
       }
       
       .sidebar.open {
         transform: translateX(0);
       }
       
+      .sidebar.open .sidebar-overlay {
+        display: block;
+      }
+      
       .sidebar-toggle {
         display: none;
+      }
+      
+      .sidebar.collapsed {
+        width: 280px !important;
+      }
+    }
+    
+    @media (min-width: 769px) {
+      .sidebar-overlay {
+        display: none !important;
+      }
+    }
+    
+    /* Touch-friendly */
+    @media (hover: none) and (pointer: coarse) {
+      .nav-link:active {
+        transform: translateX(2px);
+      }
+      
+      .user-avatar-sm:active {
+        transform: scale(0.98);
       }
     }
   `]
@@ -398,6 +466,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class SidebarComponent implements OnInit {
   currentUser: any;
   isCollapsed = false;
+  mobileOpen = false;
   progreso = 75;
 
   constructor(private authService: AuthService) {}
@@ -417,6 +486,9 @@ export class SidebarComponent implements OnInit {
     if (savedState !== null) {
       this.isCollapsed = savedState === 'true';
     }
+    
+    // Escuchar evento de toggle del navbar para cerrar en móvil
+    window.addEventListener('resize', this.handleResize.bind(this));
   }
 
   handleImageError(event: any) {
@@ -424,17 +496,29 @@ export class SidebarComponent implements OnInit {
   }
 
   toggleSidebar() {
-    this.isCollapsed = !this.isCollapsed;
-    localStorage.setItem('sidebarCollapsed', String(this.isCollapsed));
-    
-    // Emitir evento global para que el contenido se ajuste
-    window.dispatchEvent(new CustomEvent('sidebarToggle', { 
-      detail: { collapsed: this.isCollapsed } 
-    }));
+    if (window.innerWidth <= 768) {
+      this.mobileOpen = !this.mobileOpen;
+    } else {
+      this.isCollapsed = !this.isCollapsed;
+      localStorage.setItem('sidebarCollapsed', String(this.isCollapsed));
+      
+      // Emitir evento global para que el contenido se ajuste
+      window.dispatchEvent(new CustomEvent('sidebarToggle', { 
+        detail: { collapsed: this.isCollapsed } 
+      }));
+    }
   }
 
   closeMobile() {
-    // Solo para móvil
+    if (window.innerWidth <= 768) {
+      this.mobileOpen = false;
+    }
+  }
+  
+  handleResize() {
+    if (window.innerWidth > 768 && this.mobileOpen) {
+      this.mobileOpen = false;
+    }
   }
 
   getUserInitials(): string {
