@@ -11,6 +11,8 @@ const materiasRoutes = require('./routes/materias.routes');
 const errorHandler = require('./middleware/errorHandler');
 const tareasRoutes = require('./routes/tareas.routes');
 const recordatoriosRoutes = require('./routes/recordatorios.routes');
+const ragRoutes = require('./routes/rag.routes');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -43,7 +45,7 @@ app.use('/api/tareas', tareasRoutes);
 app.use('/api/examenes', examenesRoutes);
 app.use('/api/calendario', calendarioRoutes);
 app.use('/api/recordatorios', recordatoriosRoutes);
-
+app.use('/api/rag', ragRoutes);
 
 // Ruta 404
 app.use('*', (req, res) => {
