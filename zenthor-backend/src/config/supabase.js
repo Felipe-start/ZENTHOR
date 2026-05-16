@@ -1,11 +1,15 @@
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-// Cliente para operaciones que requieren privilegios elevados (ej. recordatorios)
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Cliente admin para operaciones que requieren privilegios elevados (bypass RLS)
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+// Cliente público (sin autenticación)
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Función para crear cliente autenticado por usuario (respeta RLS)
 const getSupabaseClient = (token) => {
@@ -14,8 +18,8 @@ const getSupabaseClient = (token) => {
   }
   
   return createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       global: {
         headers: {
@@ -28,5 +32,6 @@ const getSupabaseClient = (token) => {
 
 module.exports = {
   supabaseAdmin,
+  supabase,
   getSupabaseClient
 };
