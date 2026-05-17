@@ -11,7 +11,7 @@
   <ng-container *ngIf="authService.isAuthenticated">
     <app-navbar></app-navbar>
     <div class="main-layout">
-      <main class="main-content" [class.sidebar-collapsed]="isSidebarCollapsed">
+      <main class="main-content">
         <div class="content-wrapper">
           <router-outlet></router-outlet>
         </div>

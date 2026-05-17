@@ -1417,3 +1417,13 @@ a:hover {
 .delay-300 { animation-delay: 0.3s; }
 .delay-400 { animation-delay: 0.4s; }
 .delay-500 { animation-delay: 0.5s; }
+
+/* Asegurar que el contenido no quede debajo del navbar */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+:host {
+  display: block;
+}

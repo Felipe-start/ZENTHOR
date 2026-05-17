@@ -553,4 +553,16 @@
     width: 35px;
     height: 35px;
   }
+}/* Asegurar que el navbar esté siempre arriba */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Ajuste para móvil */
+@media (max-width: 768px) {
+  .navbar {
+    position: sticky;
+  }
 }
