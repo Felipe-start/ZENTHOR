@@ -12,7 +12,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [RagChatComponent, DocumentosComponent, MarkdownPipe],
+  declarations: [RagChatComponent, DocumentosComponent, MarkdownPipe],  // 👈 Ahora DocumentosComponent NO es standalone
   imports: [
     CommonModule,
     FormsModule,

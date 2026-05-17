@@ -36,7 +36,6 @@ export class RagChatComponent implements OnInit, AfterViewChecked {
   }
 
   cargarHistorial(): void {
-    // Cargar conversaciones anteriores desde localStorage
     const historial = localStorage.getItem('zenthor_chat_historial');
     if (historial) {
       const parsed = JSON.parse(historial);

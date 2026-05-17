@@ -10,7 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
       
       <div class="sidebar-header">
         <div class="logo-wrapper" (click)="toggleSidebar()">
-          <img src="assets/images/ LOGO Z.jpg" alt="ZENTHOR" class="sidebar-logo animate-float" (error)="handleImageError($event)">
+          <img src="assets/images/LOGO Z.jpg" alt="ZENTHOR" class="sidebar-logo animate-float" (error)="handleImageError($event)">
           <h2 class="logo-text" *ngIf="!isCollapsed">ZENTHOR</h2>
         </div>
 
@@ -49,6 +49,23 @@ import { AuthService } from '../../../core/services/auth.service';
         <a routerLink="/calendario" routerLinkActive="active" class="nav-link" (click)="closeMobile()">
           <i class="fas fa-calendar-week"></i>
           <span *ngIf="!isCollapsed">Calendario</span>
+        </a>
+        <!-- 🆕 NUEVAS RUTAS RAG -->
+        <a routerLink="/chat-ia" routerLinkActive="active" class="nav-link" (click)="closeMobile()">
+          <i class="fas fa-robot"></i>
+          <span *ngIf="!isCollapsed">Chat IA</span>
+        </a>
+        <a routerLink="/documentos" routerLinkActive="active" class="nav-link" (click)="closeMobile()">
+          <i class="fas fa-file-alt"></i>
+          <span *ngIf="!isCollapsed">Documentos IA</span>
+        </a>
+        <a routerLink="/conexiones" routerLinkActive="active" class="nav-link" (click)="closeMobile()">
+          <i class="fas fa-plug"></i>
+          <span *ngIf="!isCollapsed">Conexiones</span>
+        </a>
+        <a routerLink="/notificaciones" routerLinkActive="active" class="nav-link" (click)="closeMobile()">
+          <i class="fas fa-bell"></i>
+          <span *ngIf="!isCollapsed">Notificaciones</span>
         </a>
         <a routerLink="/configuracion" routerLinkActive="active" class="nav-link" (click)="closeMobile()">
           <i class="fas fa-cog"></i>
@@ -481,13 +498,11 @@ export class SidebarComponent implements OnInit {
       this.progreso = parseInt(savedProgress);
     }
 
-    // Cargar estado del sidebar desde localStorage
     const savedState = localStorage.getItem('sidebarCollapsed');
     if (savedState !== null) {
       this.isCollapsed = savedState === 'true';
     }
     
-    // Escuchar evento de toggle del navbar para cerrar en móvil
     window.addEventListener('resize', this.handleResize.bind(this));
   }
 
@@ -502,7 +517,6 @@ export class SidebarComponent implements OnInit {
       this.isCollapsed = !this.isCollapsed;
       localStorage.setItem('sidebarCollapsed', String(this.isCollapsed));
       
-      // Emitir evento global para que el contenido se ajuste
       window.dispatchEvent(new CustomEvent('sidebarToggle', { 
         detail: { collapsed: this.isCollapsed } 
       }));

@@ -20,9 +20,10 @@ export class ConexionesComponent implements OnInit {
   moodleUrl = '';
   moodleToken = '';
 
+  // Hacer toastr PUBLIC para usarlo en el template
   constructor(
-    private conexionesService: ConexionesService,
-    private toastr: ToastrService
+    public toastr: ToastrService,  // 👈 Cambiado de private a public
+    private conexionesService: ConexionesService
   ) {}
 
   ngOnInit(): void {
@@ -46,7 +47,6 @@ export class ConexionesComponent implements OnInit {
   conectarGoogle(): void {
     this.conexionesService.conectarGoogle().subscribe({
       next: (res) => {
-        // Abrir ventana de OAuth
         window.open(res.url, '_blank', 'width=500,height=600');
         this.toastr.info('Autoriza ZENTHOR en la ventana que se abrió');
       },
@@ -101,5 +101,11 @@ export class ConexionesComponent implements OnInit {
         }
       });
     }
+  }
+
+  cerrarModal(): void {
+    this.mostrarModalMoodle = false;
+    this.moodleUrl = '';
+    this.moodleToken = '';
   }
 }

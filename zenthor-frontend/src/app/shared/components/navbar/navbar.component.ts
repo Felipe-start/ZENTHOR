@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
     <nav class="navbar" [class.menu-open]="mobileMenuOpen">
       <div class="navbar-brand">
         <div class="logo-container" routerLink="/dashboard">
-          <img src="assets/images/ LOGO Z.jpg" alt="ZENTHOR" class="logo-img" (error)="handleImageError($event)">
+          <img src="assets/images/LOGO Z.jpg" alt="ZENTHOR" class="logo-img" (error)="handleImageError($event)">
           <span class="brand-name">ZENTHOR</span>
         </div>
         <button class="mobile-menu-btn" (click)="toggleMobileMenu()" aria-label="Menú">
@@ -36,6 +36,23 @@ import { AuthService } from '../../../core/services/auth.service';
           <a routerLink="/calendario" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
             <i class="fas fa-calendar-week"></i>
             <span>Calendario</span>
+          </a>
+          <!-- 🆕 NUEVAS RUTAS RAG -->
+          <a routerLink="/chat-ia" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
+            <i class="fas fa-robot"></i>
+            <span>Chat IA</span>
+          </a>
+          <a routerLink="/documentos" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
+            <i class="fas fa-file-alt"></i>
+            <span>Documentos IA</span>
+          </a>
+          <a routerLink="/conexiones" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
+            <i class="fas fa-plug"></i>
+            <span>Conexiones</span>
+          </a>
+          <a routerLink="/notificaciones" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
+            <i class="fas fa-bell"></i>
+            <span>Notificaciones</span>
           </a>
           <a routerLink="/configuracion" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
             <i class="fas fa-cog"></i>
@@ -452,11 +469,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.currentUser = user;
     });
     
-    // Cerrar menús al hacer click fuera
     this.clickListener = this.handleClickOutside.bind(this);
     document.addEventListener('click', this.clickListener);
-    
-    // Cerrar menú móvil al redimensionar a desktop
     window.addEventListener('resize', this.handleResize.bind(this));
   }
 

@@ -1,1 +1,65 @@
-<p>documentos works!</p>
+<div class="documentos-container">
+  <div class="page-header">
+    <h1>📄 Mis Documentos</h1>
+    <p>Sube tus apuntes, libros y documentos para que la IA los use como contexto</p>
+  </div>
+
+  <div class="upload-section">
+    <h3>Subir nuevo documento</h3>
+    <div class="upload-area">
+      <input type="file" id="fileInput" (change)="onFileSelected($event)" accept=".pdf,.docx,.txt">
+      <div class="upload-info" *ngIf="archivoSeleccionado">
+        <p><strong>Archivo:</strong> {{ archivoSeleccionado.name }}</p>
+        <p><strong>Tamaño:</strong> {{ (archivoSeleccionado.size / 1024).toFixed(2) }} KB</p>
+        <input type="text" class="form-control" [(ngModel)]="tituloDocumento" placeholder="Título del documento">
+        <select class="form-control" [(ngModel)]="fuenteDocumento">
+          <option value="subida_manual">Subida manual</option>
+          <option value="google_classroom">Google Classroom</option>
+          <option value="notion">Notion</option>
+        </select>
+        <div class="upload-actions">
+          <button class="btn-subir" (click)="subirDocumento()" [disabled]="subiendo">
+            <i class="fas fa-cloud-upload-alt"></i> {{ subiendo ? 'Subiendo...' : 'Subir documento' }}
+          </button>
+          <button class="btn-cancelar" (click)="cancelarSubida()">Cancelar</button>
+        </div>
+      </div>
+      <label for="fileInput" class="upload-label" *ngIf="!archivoSeleccionado">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <span>Haz clic para seleccionar un archivo</span>
+        <small>PDF, DOCX, TXT (máx. 10MB)</small>
+      </label>
+    </div>
+  </div>
+
+  <div class="documentos-list" *ngIf="!cargando; else loading">
+    <div *ngFor="let doc of documentos" class="documento-card">
+      <div class="documento-icon">
+        <i class="fas fa-file-alt"></i>
+      </div>
+      <div class="documento-info">
+        <h4>{{ doc.titulo }}</h4>
+        <p>Fuente: {{ doc.fuente }}</p>
+        <small>Subido: {{ doc.creado_en | date:'dd/MM/yyyy HH:mm' }}</small>
+      </div>
+      <div class="documento-actions">
+        <button class="btn-delete" (click)="eliminarDocumento(doc.id, doc.titulo)">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="documentos.length === 0" class="empty-state">
+      <i class="fas fa-folder-open"></i>
+      <h3>No hay documentos</h3>
+      <p>Sube tu primer documento para empezar</p>
+    </div>
+  </div>
+
+  <ng-template #loading>
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando documentos...</p>
+    </div>
+  </ng-template>
+</div>
