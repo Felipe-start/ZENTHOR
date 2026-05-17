@@ -1,12 +1,17 @@
 const { google } = require('googleapis');
 const { supabaseAdmin, getSupabaseClient } = require('../config/supabase');
 
+// ✅ URL de callback CORRECTA - Debe coincidir con Google Cloud Console
+const CALLBACK_URL = `${process.env.API_URL || 'https://zenthor.onrender.com'}/api/conexiones/google/callback`;
+
 // Configurar OAuth2 client con credenciales de Google
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  `${process.env.API_URL || 'http://localhost:3000'}/api/conexiones/google/callback`
+  CALLBACK_URL
 );
+
+console.log('🔐 Google OAuth configurado con callback:', CALLBACK_URL);
 
 // Obtener estado de conexiones del usuario
 const getConexiones = async (req, res) => {
@@ -47,21 +52,28 @@ const getConexiones = async (req, res) => {
 
 // Iniciar OAuth con Google Classroom
 const iniciarOAuthGoogle = (req, res) => {
-  const url = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: [
-      'https://www.googleapis.com/auth/classroom.courses.readonly',
-      'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
-      'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
-      'https://www.googleapis.com/auth/userinfo.email',
-      'https://www.googleapis.com/auth/userinfo.profile'
-    ],
-    state: req.userId,
-    prompt: 'consent'
-  });
-  
-  console.log(`🔐 Iniciando OAuth Google para usuario: ${req.userId}`);
-  res.json({ success: true, url });
+  try {
+    const url = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: [
+        'https://www.googleapis.com/auth/classroom.courses.readonly',
+        'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
+        'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile'
+      ],
+      state: req.userId,
+      prompt: 'consent'
+    });
+    
+    console.log(`🔐 Iniciando OAuth Google para usuario: ${req.userId}`);
+    console.log(`📍 URL generada: ${url.substring(0, 100)}...`);
+    
+    res.json({ success: true, url });
+  } catch (error) {
+    console.error('❌ Error iniciando OAuth:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
 };
 
 // Callback de Google OAuth
@@ -69,11 +81,17 @@ const callbackGoogle = async (req, res) => {
   const { code, state } = req.query;
   
   console.log(`📞 Callback Google recibido - Usuario: ${state}`);
+  console.log(`📝 Code recibido: ${code ? 'Sí' : 'No'}`);
+
+  if (!code) {
+    console.error('❌ No se recibió código de autorización');
+    return res.redirect(`${process.env.FRONTEND_URL}/conexiones?error=no_code`);
+  }
 
   try {
     // Intercambiar code por tokens
     const { tokens } = await oauth2Client.getToken(code);
-    console.log('✅ Tokens obtenidos');
+    console.log('✅ Tokens obtenidos correctamente');
 
     // Guardar en Supabase usando admin (bypass RLS)
     const { error: upsertError } = await supabaseAdmin
@@ -91,17 +109,23 @@ const callbackGoogle = async (req, res) => {
         ultima_sincronizacion: new Date()
       });
 
-    if (upsertError) throw upsertError;
+    if (upsertError) {
+      console.error('❌ Error guardando en Supabase:', upsertError);
+      throw upsertError;
+    }
+    
     console.log('✅ Configuración guardada en Supabase');
 
     // Redirigir al frontend
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://felipe-start.github.io/ZENTHOR';
     const redirectUrl = `${frontendUrl}/conexiones?success=google`;
+    console.log(`🔀 Redirigiendo a: ${redirectUrl}`);
+    
     res.redirect(redirectUrl);
 
   } catch (error) {
-    console.error('❌ Google OAuth error:', error);
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+    console.error('❌ Google OAuth error:', error.message);
+    const frontendUrl = process.env.FRONTEND_URL || 'https://felipe-start.github.io/ZENTHOR';
     const redirectUrl = `${frontendUrl}/conexiones?error=google&message=${encodeURIComponent(error.message)}`;
     res.redirect(redirectUrl);
   }

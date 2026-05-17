@@ -10,7 +10,7 @@ const {
   desconectar
 } = require('../controllers/conexiones.controller');
 
-// ✅ Rutas CORRECTAS usando el controlador real
+// ✅ Rutas correctas para conexiones
 router.get('/', authMiddleware, getConexiones);
 router.get('/google/iniciar', authMiddleware, iniciarOAuthGoogle);
 router.get('/google/callback', callbackGoogle);
