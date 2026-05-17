@@ -1,14 +1,19 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule, Routes } from '@angular/router';
+import { ConfiguracionComponent } from './configuracion/configuracion.component';
 
-import { NotificacionesRoutingModule } from './notificaciones-routing.module';
-
+const routes: Routes = [
+  { path: '', component: ConfiguracionComponent }
+];
 
 @NgModule({
-  declarations: [],
+  declarations: [ConfiguracionComponent],
   imports: [
     CommonModule,
-    NotificacionesRoutingModule
+    FormsModule,
+    RouterModule.forChild(routes)
   ]
 })
 export class NotificacionesModule { }

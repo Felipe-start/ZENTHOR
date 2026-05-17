@@ -8,19 +8,21 @@ export interface MensajeChat {
   rol: 'usuario' | 'asistente';
   contenido: string;
   fuentes?: { titulo: string; fuente: string; similitud?: number }[];
+  timestamp?: Date;
 }
 
 export interface DocumentoVector {
   id: string;
   titulo: string;
   fuente: string;
+  contenido?: string;
   creado_en: string;
   metadata: any;
 }
 
 @Injectable({ providedIn: 'root' })
 export class RagService {
-private apiUrl = `${environment.apiUrl}/api`;
+  private apiUrl = `${environment.apiUrl}/api`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -29,6 +31,7 @@ private apiUrl = `${environment.apiUrl}/api`;
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
+  // Enviar pregunta al chat IA
   enviarPregunta(pregunta: string, conversacion_id?: string): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/rag/chat`,
@@ -37,6 +40,7 @@ private apiUrl = `${environment.apiUrl}/api`;
     );
   }
 
+  // Generar guía de estudio
   generarGuia(materia_id: number, temas: string[], nivel?: string): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/rag/generar-guia`,
@@ -45,6 +49,7 @@ private apiUrl = `${environment.apiUrl}/api`;
     );
   }
 
+  // Subir documento manualmente
   subirDocumento(file: File, titulo?: string, fuente?: string): Observable<any> {
     const formData = new FormData();
     formData.append('documento', file);
@@ -58,6 +63,7 @@ private apiUrl = `${environment.apiUrl}/api`;
     );
   }
 
+  // Obtener lista de documentos del usuario
   obtenerDocumentos(): Observable<DocumentoVector[]> {
     return this.http.get<DocumentoVector[]>(
       `${this.apiUrl}/documentos`,
@@ -65,6 +71,7 @@ private apiUrl = `${environment.apiUrl}/api`;
     );
   }
 
+  // Eliminar documento
   eliminarDocumento(id: string): Observable<any> {
     return this.http.delete(
       `${this.apiUrl}/documentos/${id}`,

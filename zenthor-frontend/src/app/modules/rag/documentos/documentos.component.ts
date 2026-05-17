@@ -41,9 +41,9 @@ export class DocumentosComponent implements OnInit {
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
-      const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+      const allowedTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
       if (!allowedTypes.includes(file.type)) {
-        this.toastr.error('Solo se permiten PDF, DOCX y TXT');
+        this.toastr.error('Solo se permiten PDF, DOCX, PPTX y TXT');
         return;
       }
       if (file.size > 10 * 1024 * 1024) {
@@ -69,7 +69,6 @@ export class DocumentosComponent implements OnInit {
         this.archivoSeleccionado = null;
         this.tituloDocumento = '';
         this.cargarDocumentos();
-        // Resetear input file
         const fileInput = document.getElementById('fileInput') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
       },

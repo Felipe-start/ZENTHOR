@@ -1,15 +1,19 @@
 <div class="chat-container">
   <div class="chat-header">
     <div class="header-info">
-      <i class="fas fa-robot"></i>
+      <div class="ai-icon">
+        <i class="fas fa-robot"></i>
+      </div>
       <div>
         <h2>ZENTHOR AI Assistant</h2>
         <p>Potenciado por Groq Llama 3 | RAG con tus documentos</p>
       </div>
     </div>
-    <button class="btn-clear" (click)="limpiarChat()" title="Limpiar chat">
-      <i class="fas fa-trash-alt"></i>
-    </button>
+    <div class="header-actions">
+      <button class="btn-clear" (click)="limpiarChat()" title="Limpiar chat">
+        <i class="fas fa-trash-alt"></i>
+      </button>
+    </div>
   </div>
 
   <div class="chat-messages" #chatMessages>
@@ -19,11 +23,14 @@
         <i *ngIf="msg.rol === 'usuario'" class="fas fa-user"></i>
       </div>
       <div class="message-content">
-        <div class="message-text" [innerHTML]="msg.contenido | markdown"></div>
+        <div class="message-text" [innerHTML]="formatearTexto(msg.contenido)"></div>
         <div class="message-fuentes" *ngIf="msg.fuentes && msg.fuentes.length > 0">
           <button class="btn-fuentes" (click)="mostrarFuentes(msg.fuentes)">
             <i class="fas fa-book-open"></i> Ver fuentes ({{ msg.fuentes.length }})
           </button>
+        </div>
+        <div class="message-time" *ngIf="msg.timestamp">
+          {{ msg.timestamp | date:'short' }}
         </div>
       </div>
     </div>
@@ -61,14 +68,14 @@
       <button class="close" (click)="mostrandoFuentes = false">&times;</button>
     </div>
     <div class="modal-body">
-      <div *ngFor="let fuente of fuenteSeleccionada" class="fuente-item">
+      <div *ngFor="let fuente of fuentesSeleccionadas" class="fuente-item">
         <div class="fuente-titulo">
           <i class="fas fa-file-alt"></i>
           <strong>{{ fuente.titulo }}</strong>
         </div>
         <div class="fuente-detalle">
           <span class="badge">Fuente: {{ fuente.fuente }}</span>
-          <span class="badge" *ngIf="fuente.similitud">Similitud: {{ (fuente.similitud * 100).toFixed(1) }}%</span>
+          <span class="badge" *ngIf="fuente.similitud">Relevancia: {{ (fuente.similitud * 100).toFixed(1) }}%</span>
         </div>
       </div>
     </div>

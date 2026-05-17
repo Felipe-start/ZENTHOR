@@ -1,11 +1,12 @@
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 70px);
   background: white;
   border-radius: 1rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  margin: 1rem;
 }
 
 .chat-header {
@@ -23,8 +24,18 @@
   gap: 1rem;
 }
 
-.header-info i {
-  font-size: 2rem;
+.ai-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-icon i {
+  font-size: 1.5rem;
 }
 
 .header-info h2 {
@@ -100,16 +111,12 @@
 }
 
 .message.user .message-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
 }
 
-.message-text pre {
-  background: #1f2937;
-  color: #e5e7eb;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
+.message-text strong {
+  font-weight: 600;
 }
 
 .message-text code {
@@ -117,6 +124,10 @@
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
   font-family: monospace;
+}
+
+.message-text .emoji {
+  font-size: 1.1rem;
 }
 
 .message-fuentes {
@@ -138,7 +149,12 @@
   color: #667eea;
 }
 
-/* Typing indicator */
+.message-time {
+  font-size: 0.65rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
 .typing-indicator {
   display: flex;
   gap: 0.25rem;
@@ -161,7 +177,6 @@
   30% { transform: translateY(-10px); opacity: 1; }
 }
 
-/* Chat input */
 .chat-input {
   display: flex;
   gap: 0.75rem;
@@ -190,7 +205,7 @@
 .chat-input button {
   width: 44px;
   height: 44px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   border: none;
   border-radius: 0.75rem;
   color: white;
@@ -207,7 +222,6 @@
   cursor: not-allowed;
 }
 
-/* Modal fuentes */
 .modal {
   position: fixed;
   top: 0;
@@ -259,6 +273,7 @@
 .fuente-detalle {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .badge {
@@ -282,9 +297,8 @@
 
 @media (max-width: 768px) {
   .chat-container {
-    height: calc(100vh - 80px);
-    margin: 0;
-    border-radius: 0;
+    margin: 0.5rem;
+    height: calc(100vh - 60px);
   }
   
   .message {
