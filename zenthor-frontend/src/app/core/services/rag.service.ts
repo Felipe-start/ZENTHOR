@@ -20,7 +20,7 @@ export interface DocumentoVector {
 
 @Injectable({ providedIn: 'root' })
 export class RagService {
-  private apiUrl = environment.apiUrl;
+private apiUrl = `${environment.apiUrl}/api`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

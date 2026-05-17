@@ -11,7 +11,6 @@ import { AppComponent } from './app.component';
 
 // Shared Components
 import { NavbarComponent } from './shared/components/navbar/navbar.component';
-import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 import { FooterComponent } from './shared/components/footer/footer.component';
 import { NotificationBellComponent } from './shared/components/notification-bell/notification-bell.component';
 
@@ -26,7 +25,6 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
   declarations: [
     AppComponent,
     NavbarComponent,
-    SidebarComponent,
     FooterComponent,
     NotificationBellComponent
   ],

@@ -13,7 +13,8 @@ export interface ConexionEstado {
 
 @Injectable({ providedIn: 'root' })
 export class ConexionesService {
-  private apiUrl = environment.apiUrl;
+  // ✅ Asegurar que la URL tenga /api
+  private apiUrl = `${environment.apiUrl}/api`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
@@ -36,18 +37,18 @@ export class ConexionesService {
     );
   }
 
-  configurarMoodle(moodle_url: string, moodle_token: string): Observable<any> {
-    return this.http.post(
-      `${this.apiUrl}/conexiones/moodle`,
-      { moodle_url, moodle_token },
-      { headers: this.getHeaders() }
-    );
-  }
-
   sincronizarGoogle(): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/conexiones/google/sync`,
       {},
+      { headers: this.getHeaders() }
+    );
+  }
+
+  configurarMoodle(moodle_url: string, moodle_token: string): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/conexiones/moodle`,
+      { moodle_url, moodle_token },
       { headers: this.getHeaders() }
     );
   }
