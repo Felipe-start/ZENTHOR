@@ -4,179 +4,274 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-navbar',
   template: `
-    <nav class="navbar" [class.menu-open]="mobileMenuOpen">
-      <div class="navbar-brand">
-        <div class="logo-container" routerLink="/dashboard">
-          <img src="assets/images/LOGO Z.jpg" alt="ZENTHOR" class="logo-img" (error)="handleImageError($event)">
-          <span class="brand-name">ZENTHOR</span>
+    <nav class="navbar" [class.scrolled]="isScrolled" [class.menu-open]="mobileMenuOpen">
+      <!-- Logo -->
+      <div class="navbar-brand" routerLink="/dashboard">
+        <div class="logo-icon">
+          <i class="fas fa-brain"></i>
         </div>
-        <button class="mobile-menu-btn" (click)="toggleMobileMenu()" aria-label="Menú">
+        <span class="brand-name">ZENTHOR</span>
+        <span class="brand-badge">Enterprise</span>
+      </div>
+
+      <!-- Desktop Navigation -->
+      <div class="navbar-links desktop-menu">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a routerLink="/materias" routerLinkActive="active" class="nav-link">
+          <i class="fas fa-book"></i>
+          <span>Materias</span>
+        </a>
+        <a routerLink="/tareas" routerLinkActive="active" class="nav-link">
+          <i class="fas fa-tasks"></i>
+          <span>Tareas</span>
+        </a>
+        <a routerLink="/examenes" routerLinkActive="active" class="nav-link">
+          <i class="fas fa-calendar-alt"></i>
+          <span>Exámenes</span>
+        </a>
+        <a routerLink="/calendario" routerLinkActive="active" class="nav-link">
+          <i class="fas fa-calendar-week"></i>
+          <span>Calendario</span>
+        </a>
+
+        <!-- Dropdown IA -->
+        <div class="dropdown" (mouseenter)="openDropdown('ia')" (mouseleave)="closeDropdown('ia')">
+          <a class="nav-link dropdown-toggle">
+            <i class="fas fa-robot"></i>
+            <span>Inteligencia IA</span>
+            <i class="fas fa-chevron-down"></i>
+          </a>
+          <div class="dropdown-menu" [class.show]="activeDropdown === 'ia'">
+            <a routerLink="/chat-ia" class="dropdown-item">
+              <i class="fas fa-comment-dots"></i>
+              <div>
+                <strong>Chat IA</strong>
+                <small>Resuelve tus dudas al instante</small>
+              </div>
+            </a>
+            <a routerLink="/documentos" class="dropdown-item">
+              <i class="fas fa-file-alt"></i>
+              <div>
+                <strong>Documentos IA</strong>
+                <small>Sube y vectoriza tus apuntes</small>
+              </div>
+            </a>
+            <a routerLink="/conexiones" class="dropdown-item">
+              <i class="fas fa-plug"></i>
+              <div>
+                <strong>Conexiones</strong>
+                <small>Google, Notion, Moodle</small>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <a routerLink="/configuracion" routerLinkActive="active" class="nav-link">
+          <i class="fas fa-cog"></i>
+          <span>Configuración</span>
+        </a>
+      </div>
+
+      <!-- Right Section -->
+      <div class="navbar-right">
+        <!-- Notificaciones -->
+        <div class="notification-btn" (click)="toggleNotifications()">
+          <i class="fas fa-bell"></i>
+          <span class="badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
+        </div>
+
+        <!-- User Menu -->
+        <div class="user-menu" (click)="toggleUserMenu()">
+          <div class="user-avatar">
+            {{ getUserInitials() }}
+          </div>
+          <span class="user-name">{{ currentUser?.nombre_completo?.split(' ')[0] || 'Usuario' }}</span>
+          <i class="fas fa-chevron-down" [class.rotated]="userMenuOpen"></i>
+        </div>
+
+        <!-- Dropdown User -->
+        <div class="dropdown-user" [class.show]="userMenuOpen">
+          <div class="user-header">
+            <div class="user-avatar-lg">{{ getUserInitials() }}</div>
+            <div class="user-info">
+              <h4>{{ currentUser?.nombre_completo || 'Usuario' }}</h4>
+              <p>{{ currentUser?.email || 'usuario@zenthor.com' }}</p>
+            </div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a routerLink="/perfil" class="dropdown-item" (click)="closeMenus()">
+            <i class="fas fa-user-circle"></i> Mi Perfil
+          </a>
+          <a routerLink="/configuracion" class="dropdown-item" (click)="closeMenus()">
+            <i class="fas fa-cog"></i> Configuración
+          </a>
+          <a routerLink="/notificaciones" class="dropdown-item" (click)="closeMenus()">
+            <i class="fas fa-bell"></i> Notificaciones
+          </a>
+          <div class="dropdown-divider"></div>
+          <button (click)="logout()" class="dropdown-item logout">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+          </button>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
           <i class="fas" [class.fa-bars]="!mobileMenuOpen" [class.fa-times]="mobileMenuOpen"></i>
         </button>
       </div>
-      
-      <div class="navbar-menu" [class.active]="mobileMenuOpen">
-        <div class="navbar-start">
-          <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
-            <i class="fas fa-chart-line"></i>
-            <span>Dashboard</span>
-          </a>
-          <a routerLink="/materias" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
-            <i class="fas fa-book"></i>
-            <span>Materias</span>
-          </a>
-          <a routerLink="/tareas" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
-            <i class="fas fa-tasks"></i>
-            <span>Tareas</span>
-          </a>
-          <a routerLink="/examenes" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
-            <i class="fas fa-calendar-alt"></i>
-            <span>Exámenes</span>
-          </a>
-          <a routerLink="/calendario" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
-            <i class="fas fa-calendar-week"></i>
-            <span>Calendario</span>
-          </a>
-          <!-- 🆕 NUEVAS RUTAS RAG -->
-          <a routerLink="/chat-ia" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
-            <i class="fas fa-robot"></i>
-            <span>Chat IA</span>
-          </a>
-          <a routerLink="/documentos" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
-            <i class="fas fa-file-alt"></i>
-            <span>Documentos IA</span>
-          </a>
-          <a routerLink="/conexiones" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
-            <i class="fas fa-plug"></i>
-            <span>Conexiones</span>
-          </a>
-          <a routerLink="/notificaciones" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
-            <i class="fas fa-bell"></i>
-            <span>Notificaciones</span>
-          </a>
-          <a routerLink="/configuracion" routerLinkActive="active" class="nav-item" (click)="closeMobileMenu()">
-            <i class="fas fa-cog"></i>
-            <span>Configuración</span>
-          </a>
-        </div>
-        
-        <div class="navbar-end">
-          <app-notification-bell></app-notification-bell>
-          
-          <div class="user-menu" (click)="toggleUserMenu()">
-            <div class="user-avatar">
-              {{ getUserInitials() }}
-            </div>
-            <span class="user-name">{{ currentUser?.nombre_completo?.split(' ')[0] || 'Usuario' }}</span>
-            <i class="fas fa-chevron-down" [class.rotated]="userMenuOpen"></i>
-          </div>
-          <div class="dropdown-menu" [class.show]="userMenuOpen">
-            <a routerLink="/perfil" class="dropdown-item" (click)="closeMobileMenu()">
-              <i class="fas fa-user-circle"></i>
-              <span>Mi Perfil</span>
-            </a>
-            <div class="dropdown-divider"></div>
-            <button (click)="logout()" class="dropdown-item logout">
-              <i class="fas fa-sign-out-alt"></i>
-              <span>Cerrar Sesión</span>
-            </button>
+
+      <!-- Mobile Menu Overlay -->
+      <div class="mobile-overlay" *ngIf="mobileMenuOpen" (click)="closeMobileMenu()"></div>
+
+      <!-- Mobile Menu -->
+      <div class="mobile-menu" [class.open]="mobileMenuOpen">
+        <div class="mobile-user-section">
+          <div class="mobile-user-avatar">{{ getUserInitials() }}</div>
+          <div class="mobile-user-info">
+            <h3>{{ currentUser?.nombre_completo || 'Usuario' }}</h3>
+            <p>{{ currentUser?.email || 'usuario@zenthor.com' }}</p>
           </div>
         </div>
+
+        <div class="mobile-nav-items">
+          <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
+            <i class="fas fa-chart-line"></i> Dashboard
+          </a>
+          <a routerLink="/materias" routerLinkActive="active" (click)="closeMobileMenu()">
+            <i class="fas fa-book"></i> Materias
+          </a>
+          <a routerLink="/tareas" routerLinkActive="active" (click)="closeMobileMenu()">
+            <i class="fas fa-tasks"></i> Tareas
+          </a>
+          <a routerLink="/examenes" routerLinkActive="active" (click)="closeMobileMenu()">
+            <i class="fas fa-calendar-alt"></i> Exámenes
+          </a>
+          <a routerLink="/calendario" routerLinkActive="active" (click)="closeMobileMenu()">
+            <i class="fas fa-calendar-week"></i> Calendario
+          </a>
+
+          <div class="mobile-divider">Inteligencia IA</div>
+
+          <a routerLink="/chat-ia" routerLinkActive="active" (click)="closeMobileMenu()">
+            <i class="fas fa-robot"></i> Chat IA
+          </a>
+          <a routerLink="/documentos" routerLinkActive="active" (click)="closeMobileMenu()">
+            <i class="fas fa-file-alt"></i> Documentos IA
+          </a>
+          <a routerLink="/conexiones" routerLinkActive="active" (click)="closeMobileMenu()">
+            <i class="fas fa-plug"></i> Conexiones
+          </a>
+
+          <div class="mobile-divider"></div>
+
+          <a routerLink="/configuracion" routerLinkActive="active" (click)="closeMobileMenu()">
+            <i class="fas fa-cog"></i> Configuración
+          </a>
+          <a routerLink="/notificaciones" routerLinkActive="active" (click)="closeMobileMenu()">
+            <i class="fas fa-bell"></i> Notificaciones
+          </a>
+        </div>
+
+        <button class="mobile-logout" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </button>
       </div>
     </nav>
+
+    <!-- Main Content Wrapper (para ajustar el padding-top) -->
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
   `,
   styles: [`
     /* ============================================
-       NAVBAR - Fully Responsive Styles
+       NAVBAR PRINCIPAL - Estilo Profesional
        ============================================ */
-    
+
     .navbar {
-      background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #4c1d95 100%);
-      padding: 0 clamp(1rem, 4vw, 1.75rem);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #2e1065 100%);
+      padding: 0 clamp(1.5rem, 5vw, 2.5rem);
       height: 70px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      position: sticky;
-      top: 0;
       z-index: 1000;
       transition: all 0.3s ease;
     }
-    
-    /* Navbar Brand */
-    .navbar-brand {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.25rem;
-      flex-shrink: 0;
+
+    .navbar.scrolled {
+      height: 60px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      backdrop-filter: blur(10px);
     }
-    
-    .logo-container {
+
+    /* Brand / Logo */
+    .navbar-brand {
       display: flex;
       align-items: center;
       gap: 0.75rem;
       cursor: pointer;
-      transition: transform 0.3s ease;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
     }
-    
-    .logo-container:hover {
+
+    .navbar-brand:hover {
       transform: scale(1.02);
     }
-    
-    .logo-img {
-      width: clamp(35px, 8vw, 45px);
-      height: clamp(35px, 8vw, 45px);
-      border-radius: clamp(10px, 3vw, 12px);
-      object-fit: cover;
-      transition: all 0.3s ease;
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
     }
-    
+
+    .logo-icon i {
+      font-size: 1.5rem;
+      color: white;
+    }
+
     .brand-name {
-      font-size: clamp(1.125rem, 5vw, 1.5rem);
+      font-size: 1.5rem;
       font-weight: 800;
       background: linear-gradient(135deg, #fff 0%, #c4b5fd 50%, #a78bfa 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
-    /* Mobile Menu Button */
-    .mobile-menu-btn {
-      display: none;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: white;
-      font-size: clamp(1rem, 4vw, 1.25rem);
-      cursor: pointer;
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      transition: all 0.3s ease;
+
+    .brand-badge {
+      font-size: 0.7rem;
+      background: rgba(102, 126, 234, 0.2);
+      padding: 0.25rem 0.5rem;
+      border-radius: 20px;
+      color: #a78bfa;
+      font-weight: 500;
+      border: 1px solid rgba(167, 139, 250, 0.3);
     }
-    
-    .mobile-menu-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-    
-    /* Navbar Menu */
-    .navbar-menu {
+
+    /* Desktop Navigation Links */
+    .navbar-links {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      flex: 1;
-      margin-left: 2rem;
-      transition: all 0.3s ease;
-    }
-    
-    .navbar-start {
-      display: flex;
       gap: 0.25rem;
-      flex-wrap: wrap;
+      flex: 1;
+      justify-content: center;
     }
-    
-    .nav-item {
+
+    .nav-link {
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -186,272 +281,461 @@ import { AuthService } from '../../../core/services/auth.service';
       border-radius: 12px;
       transition: all 0.3s ease;
       font-weight: 500;
-      font-size: clamp(0.75rem, 3vw, 0.875rem);
-      white-space: nowrap;
+      font-size: 0.875rem;
     }
-    
-    .nav-item i {
-      font-size: clamp(0.875rem, 3vw, 1rem);
+
+    .nav-link i {
+      font-size: 1rem;
     }
-    
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.15);
+
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
       color: white;
       transform: translateY(-2px);
     }
-    
-    .nav-item.active {
-      background: rgba(255, 255, 255, 0.2);
+
+    .nav-link.active {
+      background: rgba(102, 126, 234, 0.3);
       color: white;
     }
-    
-    /* Navbar End */
-    .navbar-end {
+
+    /* Dropdown */
+    .dropdown {
       position: relative;
+    }
+
+    .dropdown-toggle {
+      cursor: pointer;
+    }
+
+    .dropdown-toggle i.fa-chevron-down {
+      font-size: 0.7rem;
+      margin-left: 0.25rem;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      border-radius: 16px;
+      min-width: 260px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      padding: 0.5rem;
+    }
+
+    .dropdown-menu.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(10px);
+    }
+
+    .dropdown-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      color: #1f2937;
+      text-decoration: none;
+      border-radius: 12px;
+      transition: all 0.2s;
     }
-    
+
+    .dropdown-item i {
+      width: 24px;
+      font-size: 1.125rem;
+      color: #667eea;
+    }
+
+    .dropdown-item div {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dropdown-item strong {
+      font-size: 0.875rem;
+    }
+
+    .dropdown-item small {
+      font-size: 0.7rem;
+      color: #6b7280;
+    }
+
+    .dropdown-item:hover {
+      background: #f3f4f6;
+      transform: translateX(4px);
+    }
+
+    /* Right Section */
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    /* Notification Button */
+    .notification-btn {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .notification-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.05);
+    }
+
+    .notification-btn i {
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #ef4444;
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.125rem 0.375rem;
+      border-radius: 20px;
+    }
+
+    /* User Menu */
     .user-menu {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      cursor: pointer;
       padding: 0.5rem 1rem;
-      border-radius: 40px;
       background: rgba(255, 255, 255, 0.05);
+      border-radius: 40px;
+      cursor: pointer;
       transition: all 0.3s ease;
     }
-    
+
     .user-menu:hover {
       background: rgba(255, 255, 255, 0.1);
     }
-    
+
     .user-avatar {
-      width: clamp(32px, 8vw, 36px);
-      height: clamp(32px, 8vw, 36px);
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #667eea, #8b5cf6);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-weight: 600;
-      font-size: clamp(0.875rem, 3vw, 1rem);
-      flex-shrink: 0;
+      font-size: 0.875rem;
     }
-    
+
     .user-name {
       color: white;
       font-weight: 500;
-      font-size: clamp(0.75rem, 3vw, 0.875rem);
+      font-size: 0.875rem;
     }
-    
+
     .fa-chevron-down {
-      transition: transform 0.3s ease;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: clamp(0.688rem, 2.5vw, 0.75rem);
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.6);
+      transition: transform 0.3s;
     }
-    
+
     .fa-chevron-down.rotated {
       transform: rotate(180deg);
     }
-    
-    /* Dropdown Menu */
-    .dropdown-menu {
+
+    /* Dropdown User */
+    .dropdown-user {
       position: absolute;
       top: 100%;
       right: 0;
       background: white;
-      border-radius: clamp(0.75rem, 3vw, 1rem);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-      min-width: 200px;
+      border-radius: 20px;
+      min-width: 300px;
       opacity: 0;
       visibility: hidden;
       transform: translateY(-10px);
       transition: all 0.3s ease;
-      z-index: 1000;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      margin-top: 0.75rem;
     }
-    
-    .dropdown-menu.show {
+
+    .dropdown-user.show {
       opacity: 1;
       visibility: visible;
-      transform: translateY(10px);
+      transform: translateY(0);
     }
-    
-    .dropdown-item {
+
+    .user-header {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1.25rem;
-      color: #374151;
-      text-decoration: none;
-      width: 100%;
-      background: none;
-      border: none;
-      cursor: pointer;
+      gap: 1rem;
+      padding: 1rem;
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      border-radius: 20px 20px 0 0;
+    }
+
+    .user-avatar-lg {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #667eea, #8b5cf6);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+
+    .user-info h4 {
+      margin: 0;
       font-size: 0.875rem;
-      transition: all 0.2s ease;
+      font-weight: 600;
+      color: #1f2937;
     }
-    
-    .dropdown-item:hover {
-      background: #f3f4f6;
-      color: #6366f1;
+
+    .user-info p {
+      margin: 0.25rem 0 0;
+      font-size: 0.75rem;
+      color: #6b7280;
     }
-    
+
     .dropdown-divider {
       height: 1px;
       background: #e5e7eb;
       margin: 0.25rem 0;
     }
-    
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      color: #374151;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      width: 100%;
+      background: none;
+      border: none;
+      font-size: 0.875rem;
+    }
+
+    .dropdown-item i {
+      width: 20px;
+      color: #667eea;
+    }
+
+    .dropdown-item:hover {
+      background: #f3f4f6;
+    }
+
     .logout {
       color: #ef4444;
     }
-    
+
+    .logout i {
+      color: #ef4444;
+    }
+
     .logout:hover {
       background: #fee2e2;
-      color: #dc2626;
     }
-    
-    /* Desktop Adjustments */
+
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      font-size: 1.25rem;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .mobile-menu-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Mobile Overlay */
+    .mobile-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 998;
+    }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 85%;
+      max-width: 320px;
+      height: 100%;
+      background: white;
+      box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+      transition: right 0.3s ease;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .mobile-menu.open {
+      right: 0;
+    }
+
+    .mobile-user-section {
+      padding: 2rem 1.5rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .mobile-user-avatar {
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    .mobile-user-info h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: white;
+    }
+
+    .mobile-user-info p {
+      margin: 0.25rem 0 0;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .mobile-nav-items {
+      flex: 1;
+      padding: 1rem;
+    }
+
+    .mobile-nav-items a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      color: #374151;
+      text-decoration: none;
+      border-radius: 12px;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .mobile-nav-items a i {
+      width: 24px;
+      color: #667eea;
+    }
+
+    .mobile-nav-items a:hover,
+    .mobile-nav-items a.active {
+      background: #f3f4f6;
+    }
+
+    .mobile-divider {
+      padding: 0.75rem 1rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #9ca3af;
+      letter-spacing: 0.5px;
+      margin-top: 0.5rem;
+    }
+
+    .mobile-logout {
+      margin: 1rem;
+      padding: 0.875rem;
+      background: #fee2e2;
+      border: none;
+      border-radius: 12px;
+      color: #ef4444;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    /* Content Wrapper */
+    .content-wrapper {
+      padding-top: 70px;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+    }
+
+    /* Responsive */
     @media (max-width: 1024px) {
-      .navbar-start {
-        gap: 0.125rem;
-      }
-      
-      .nav-item span {
+      .desktop-menu {
         display: none;
-      }
-      
-      .nav-item i {
-        margin: 0;
-      }
-      
-      .nav-item {
-        padding: 0.5rem 0.75rem;
-      }
-      
-      .user-name {
-        display: none;
-      }
-    }
-    
-    /* Mobile Styles */
-    @media (max-width: 768px) {
-      .navbar {
-        padding: 0 1rem;
-      }
-      
-      .logo-img {
-        width: 35px;
-        height: 35px;
-      }
-      
-      .brand-name {
-        font-size: 1.125rem;
       }
       
       .mobile-menu-btn {
         display: block;
       }
       
-      .navbar-menu {
-        position: fixed;
-        top: 70px;
-        left: -100%;
-        width: 100%;
-        height: calc(100vh - 70px);
-        background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 100%);
-        flex-direction: column;
-        margin-left: 0;
-        transition: left 0.3s ease;
-        padding: 1rem;
-        z-index: 999;
-        overflow-y: auto;
-      }
-      
-      .navbar-menu.active {
-        left: 0;
-      }
-      
-      .navbar-start {
-        flex-direction: column;
-        width: 100%;
-      }
-      
-      .nav-item {
-        padding: 0.875rem 1rem;
-        width: 100%;
-        justify-content: flex-start;
-      }
-      
-      .nav-item span {
-        display: inline;
-      }
-      
-      .navbar-end {
-        width: 100%;
-        margin-top: 1rem;
-        flex-direction: column;
-      }
-      
-      .user-menu {
-        width: 100%;
-        justify-content: center;
-        padding: 0.75rem;
-      }
-      
       .user-name {
-        display: inline;
-      }
-      
-      .dropdown-menu {
-        position: static;
-        width: 100%;
-        margin-top: 0.5rem;
-        box-shadow: none;
-        background: rgba(255, 255, 255, 0.1);
-      }
-      
-      .dropdown-item {
-        color: white;
-      }
-      
-      .dropdown-item:hover {
-        background: rgba(255, 255, 255, 0.15);
-        color: white;
-      }
-      
-      .dropdown-divider {
-        background: rgba(255, 255, 255, 0.2);
+        display: none;
       }
     }
-    
-    @media (max-width: 480px) {
+
+    @media (max-width: 768px) {
       .navbar {
-        height: 60px;
+        padding: 0 1rem;
       }
       
-      .navbar-menu {
-        top: 60px;
-        height: calc(100vh - 60px);
+      .brand-badge {
+        display: none;
       }
       
-      .nav-item {
-        padding: 0.75rem;
-      }
-    }
-    
-    /* Touch-friendly */
-    @media (hover: none) and (pointer: coarse) {
-      .nav-item:active {
-        background: rgba(255, 255, 255, 0.2);
+      .brand-name {
+        font-size: 1.25rem;
       }
       
-      .user-menu:active {
-        background: rgba(255, 255, 255, 0.15);
+      .logo-icon {
+        width: 35px;
+        height: 35px;
+      }
+      
+      .logo-icon i {
+        font-size: 1.25rem;
       }
     }
   `]
@@ -460,6 +744,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
   currentUser: any;
   mobileMenuOpen = false;
   userMenuOpen = false;
+  activeDropdown: string | null = null;
+  notificationCount = 3;
+  isScrolled = false;
   private clickListener: any;
 
   constructor(private authService: AuthService) {}
@@ -471,16 +758,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
     
     this.clickListener = this.handleClickOutside.bind(this);
     document.addEventListener('click', this.clickListener);
-    window.addEventListener('resize', this.handleResize.bind(this));
+    window.addEventListener('scroll', this.handleScroll.bind(this));
   }
 
   ngOnDestroy() {
     document.removeEventListener('click', this.clickListener);
-    window.removeEventListener('resize', this.handleResize.bind(this));
+    window.removeEventListener('scroll', this.handleScroll.bind(this));
   }
 
-  handleImageError(event: any) {
-    event.target.src = '';
+  handleScroll() {
+    this.isScrolled = window.scrollY > 50;
   }
 
   getUserInitials(): string {
@@ -495,10 +782,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return 'U';
   }
 
-  toggleMobileMenu(event?: Event) {
-    if (event) {
-      event.stopPropagation();
-    }
+  toggleMobileMenu() {
     this.mobileMenuOpen = !this.mobileMenuOpen;
     if (this.mobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -512,23 +796,34 @@ export class NavbarComponent implements OnInit, OnDestroy {
     document.body.style.overflow = '';
   }
 
-  toggleUserMenu(event?: Event) {
-    if (event) {
-      event.stopPropagation();
-    }
+  toggleUserMenu() {
     this.userMenuOpen = !this.userMenuOpen;
+  }
+
+  openDropdown(name: string) {
+    this.activeDropdown = name;
+  }
+
+  closeDropdown(name: string) {
+    if (this.activeDropdown === name) {
+      this.activeDropdown = null;
+    }
+  }
+
+  closeMenus() {
+    this.userMenuOpen = false;
+    this.activeDropdown = null;
+  }
+
+  toggleNotifications() {
+    // Implementar notificaciones
+    console.log('Abrir notificaciones');
   }
 
   handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (!target.closest('.user-menu') && !target.closest('.dropdown-menu')) {
+    if (!target.closest('.user-menu') && !target.closest('.dropdown-user')) {
       this.userMenuOpen = false;
-    }
-  }
-
-  handleResize() {
-    if (window.innerWidth > 768 && this.mobileMenuOpen) {
-      this.closeMobileMenu();
     }
   }
 

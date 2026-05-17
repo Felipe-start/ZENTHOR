@@ -288,3 +288,48 @@ small {
     grid-template-columns: 1fr;
   }
 }
+.card-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  background: white;
+  padding: 0.5rem;
+}
+
+.card-icon img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.card-icon.google {
+  background: #4285f4;
+}
+.card-icon.google img {
+  filter: brightness(0) invert(1);
+}
+
+.card-icon.notion {
+  background: #000000;
+}
+.card-icon.notion img {
+  filter: brightness(0) invert(1);
+}
+
+.card-icon.teams {
+  background: linear-gradient(135deg, #464eb8, #7c3aed);
+}
+.card-icon.teams img {
+  filter: brightness(0) invert(1);
+}
+
+.card-icon.moodle {
+  background: linear-gradient(135deg, #f3542c, #ff6b35);
+}
+.card-icon.moodle img {
+  filter: brightness(0) invert(1);
+}

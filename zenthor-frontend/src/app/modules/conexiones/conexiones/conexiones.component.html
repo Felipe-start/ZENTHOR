@@ -1,22 +1,21 @@
 <div class="conexiones-container">
   <div class="page-header">
-    <div class="header-title">
-      <h1>🔌 Conecta tus plataformas</h1>
-      <p>Sincroniza automáticamente tareas, exámenes y documentos desde tus plataformas favoritas</p>
-    </div>
+    <h1>🔌 Conecta tus plataformas</h1>
+    <p>Sincroniza automáticamente tareas, exámenes y documentos desde tus plataformas favoritas</p>
   </div>
 
   <div class="conexiones-grid" *ngIf="!cargando; else loading">
+    
     <!-- Google Classroom -->
     <div class="conexion-card" [class.conectado]="conexiones.google_classroom.activo">
       <div class="card-icon google">
-        <i class="fab fa-google"></i>
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google Classroom">
       </div>
       <h3>Google Classroom</h3>
       <p>Sincroniza tus clases, tareas y materiales</p>
       <div class="card-actions">
         <button *ngIf="!conexiones.google_classroom.activo" class="btn-conectar" (click)="conectarGoogle()">
-          <i class="fas fa-plug"></i> Conectar
+          <i class="fab fa-google"></i> Conectar con Google
         </button>
         <button *ngIf="conexiones.google_classroom.activo" class="btn-sync" (click)="sincronizarGoogle()" [disabled]="sincronizando">
           <i class="fas fa-sync-alt" [class.spinning]="sincronizando"></i> Sincronizar
@@ -27,22 +26,19 @@
       </div>
       <div class="status" *ngIf="conexiones.google_classroom.activo">
         <span class="badge connected">✅ Conectado</span>
-        <span class="last-sync" *ngIf="conexiones.google_classroom.ultima_sincronizacion">
-          Última sincronización: {{ conexiones.google_classroom.ultima_sincronizacion | date:'short' }}
-        </span>
       </div>
     </div>
 
     <!-- Notion -->
     <div class="conexion-card" [class.conectado]="conexiones.notion.activo">
       <div class="card-icon notion">
-        <i class="fab fa-notion"></i>
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/notion/notion-original.svg" alt="Notion">
       </div>
       <h3>Notion</h3>
       <p>Tus apuntes y bases de conocimiento</p>
       <div class="card-actions">
         <button class="btn-conectar" [disabled]="true" (click)="toastr.info('Próximamente')">
-          <i class="fas fa-plug"></i> Próximamente
+          <i class="fab fa-notion"></i> Próximamente
         </button>
       </div>
     </div>
@@ -50,13 +46,13 @@
     <!-- Microsoft Teams -->
     <div class="conexion-card" [class.conectado]="conexiones.teams.activo">
       <div class="card-icon teams">
-        <i class="fab fa-microsoft"></i>
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoft/microsoft-original.svg" alt="Microsoft Teams">
       </div>
       <h3>Microsoft Teams</h3>
       <p>Tareas, reuniones y archivos</p>
       <div class="card-actions">
         <button class="btn-conectar" [disabled]="true" (click)="toastr.info('Próximamente')">
-          <i class="fas fa-plug"></i> Próximamente
+          <i class="fab fa-microsoft"></i> Próximamente
         </button>
       </div>
     </div>
@@ -64,13 +60,13 @@
     <!-- Moodle -->
     <div class="conexion-card" [class.conectado]="conexiones.moodle.activo">
       <div class="card-icon moodle">
-        <i class="fas fa-graduation-cap"></i>
+        <img src="https://moodle.org/logo/moodle-logo.svg" alt="Moodle" style="width: 45px;">
       </div>
       <h3>Moodle</h3>
       <p>Configura tu instancia de Moodle</p>
       <div class="card-actions">
         <button *ngIf="!conexiones.moodle.activo" class="btn-conectar" (click)="mostrarModalMoodle = true">
-          <i class="fas fa-cog"></i> Configurar
+          <i class="fas fa-cog"></i> Configurar Moodle
         </button>
         <button *ngIf="conexiones.moodle.activo" class="btn-desconectar" (click)="desconectar('moodle', 'Moodle')">
           <i class="fas fa-trash-alt"></i> Desconectar
@@ -78,17 +74,16 @@
       </div>
       <div class="status" *ngIf="conexiones.moodle.activo">
         <span class="badge connected">✅ Conectado</span>
-        <span class="last-sync" *ngIf="conexiones.moodle.nombre">{{ conexiones.moodle.nombre }}</span>
       </div>
     </div>
   </div>
 
-  <!-- Modal Moodle -->
+  <!-- Modal Moodle (igual que antes) -->
   <div class="modal" [class.show]="mostrarModalMoodle" *ngIf="mostrarModalMoodle">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Configurar Moodle</h2>
-        <button class="close" (click)="mostrarModalMoodle = false">&times;</button>
+        <h2>📚 Configurar Moodle</h2>
+        <button class="close" (click)="cerrarModal()">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
@@ -103,7 +98,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-secondary" (click)="mostrarModalMoodle = false">Cancelar</button>
+        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
         <button class="btn-primary" (click)="configurarMoodle()">Guardar y sincronizar</button>
       </div>
     </div>

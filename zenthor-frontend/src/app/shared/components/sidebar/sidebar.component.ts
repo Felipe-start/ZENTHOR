@@ -10,7 +10,7 @@ import { AuthService } from '../../../core/services/auth.service';
       
       <div class="sidebar-header">
         <div class="logo-wrapper" (click)="toggleSidebar()">
-          <img src="assets/images/LOGO Z.jpg" alt="ZENTHOR" class="sidebar-logo animate-float" (error)="handleImageError($event)">
+          <img src="assets/images/ LOGO Z.jpg" alt="ZENTHOR" class="sidebar-logo animate-float" (error)="handleImageError($event)">
           <h2 class="logo-text" *ngIf="!isCollapsed">ZENTHOR</h2>
         </div>
 
