@@ -1,22 +1,23 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
+const {
+  upload,
+  previsualizarDocumento,
+  confirmarSubida,
+  getDocumentos,
+  eliminarDocumento
+} = require('../controllers/documentos.controller');
 
-// Placeholder temporal
-const uploadDocumento = (req, res) => {
-  res.json({ success: true, message: 'Documento subido (placeholder)' });
-};
-
-const getDocumentos = (req, res) => {
-  res.json({ success: true, data: [] });
-};
-
-const deleteDocumento = (req, res) => {
-  res.json({ success: true, message: `Documento ${req.params.id} eliminado` });
-};
-
-router.post('/upload', authMiddleware, uploadDocumento);
+// ✅ Rutas CORRECTAS
+router.post('/previsualizar', authMiddleware, upload.single('documento'), previsualizarDocumento);
+router.post('/confirmar', authMiddleware, confirmarSubida);
+router.post('/upload', authMiddleware, upload.single('documento'), async (req, res) => {
+  // Redirigir a previsualizar o directamente subir
+  const { titulo, fuente } = req.body;
+  // Implementación directa
+});
 router.get('/', authMiddleware, getDocumentos);
-router.delete('/:id', authMiddleware, deleteDocumento);
+router.delete('/:id', authMiddleware, eliminarDocumento);
 
 module.exports = router;

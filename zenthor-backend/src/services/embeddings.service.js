@@ -5,22 +5,25 @@ const HF_API_URL = 'https://api-inference.huggingface.co/pipeline/feature-extrac
 
 const generarEmbedding = async (texto) => {
   try {
+    console.log('🔄 Generando embedding...');
     const response = await axios.post(
       HF_API_URL,
       {
-        inputs: texto.substring(0, 5000), // Limitar a 5000 caracteres
+        inputs: texto.substring(0, 5000),
         options: { wait_for_model: true }
       },
       {
         headers: {
           'Authorization': `Bearer ${process.env.HF_TOKEN}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 30000
       }
     );
+    console.log('✅ Embedding generado');
     return response.data;
   } catch (error) {
-    console.error('Error generando embedding:', error.message);
+    console.error('❌ Error generando embedding:', error.message);
     return null;
   }
 };
@@ -47,9 +50,10 @@ const vectorizarDocumento = async (userId, titulo, contenido, fuente, metadata =
       .single();
 
     if (error) throw error;
+    console.log(`✅ Documento vectorizado: ${titulo}`);
     return data;
   } catch (error) {
-    console.error('Error vectorizando documento:', error);
+    console.error('❌ Error vectorizando:', error);
     throw error;
   }
 };
