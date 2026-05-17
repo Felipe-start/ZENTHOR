@@ -1,0 +1,219 @@
+<div class="rag-hub">
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-toggle" (click)="toggleSidebar()" *ngIf="isMobile">
+    <i class="fas" [class.fa-bars]="!mostrarSidebar" [class.fa-times]="mostrarSidebar"></i>
+  </button>
+
+  <!-- Sidebar de Documentos -->
+  <aside class="rag-sidebar" [class.hidden]="isMobile && !mostrarSidebar">
+    <div class="sidebar-header">
+      <div class="logo-area">
+        <i class="fas fa-brain"></i>
+        <span>ZENTHOR</span>
+      </div>
+      <div class="stats-badge">
+        {{ documentos.length }} docs
+      </div>
+    </div>
+
+    <div class="upload-area">
+      <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf,.docx,.pptx,.txt,.jpg,.png" hidden>
+      
+      <div *ngIf="!archivoSeleccionado" class="upload-zone" (click)="fileInput.click()">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <span>Subir documento</span>
+        <small>PDF, DOCX, PPTX, TXT, JPG, PNG</small>
+      </div>
+
+      <div *ngIf="archivoSeleccionado" class="upload-preview" [formGroup]="uploadForm">
+        <div class="file-info">
+          <i class="fas fa-file-alt"></i>
+          <div>
+            <strong>{{ archivoSeleccionado.name | slice:0:30 }}</strong>
+            <small>{{ (archivoSeleccionado.size / 1024).toFixed(1) }} KB</small>
+          </div>
+        </div>
+        <input type="text" class="form-control" placeholder="Título (opcional)" formControlName="titulo">
+        <select class="form-control" formControlName="fuente">
+          <option value="subida_manual">📁 Subida manual</option>
+          <option value="google_classroom">📚 Google Classroom</option>
+          <option value="notion">📓 Notion</option>
+        </select>
+        <div class="upload-actions">
+          <button class="btn-upload" (click)="subirDocumento()" [disabled]="subiendo">
+            <i class="fas fa-cloud-upload-alt"></i> {{ subiendo ? 'Subiendo...' : 'Subir' }}
+          </button>
+          <button class="btn-cancel" (click)="cancelarSubida()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="documentos-list">
+      <div class="section-title">
+        <i class="fas fa-database"></i> Mis documentos
+        <span class="count">{{ documentos.length }}</span>
+      </div>
+      
+      <div *ngIf="cargandoDocs" class="loading-docs">
+        <div class="spinner-sm"></div>
+      </div>
+
+      <div *ngFor="let doc of documentos" class="doc-item">
+        <div class="doc-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <div class="doc-info">
+          <div class="doc-title">{{ doc.titulo | slice:0:25 }}</div>
+          <div class="doc-meta">
+            <span class="doc-source">{{ doc.fuente | titlecase }}</span>
+            <span class="doc-date">{{ doc.creado_en | date:'shortDate' }}</span>
+          </div>
+        </div>
+        <button class="doc-delete" (click)="eliminarDocumento(doc.id, doc.titulo)" title="Eliminar">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </div>
+
+      <div *ngIf="documentos.length === 0 && !cargandoDocs" class="empty-docs">
+        <i class="fas fa-folder-open"></i>
+        <p>No hay documentos</p>
+        <small>Sube tu primer documento</small>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Chat Principal -->
+  <main class="rag-chat">
+    <div class="chat-header">
+      <div class="header-info">
+        <div class="ai-avatar">
+          <i class="fas fa-robot"></i>
+          <div class="pulse-dot"></div>
+        </div>
+        <div>
+          <h2>ZENTHOR AI Assistant</h2>
+          <p>Potenciado por Groq Llama 3 | <strong>{{ documentos.length }}</strong> documentos disponibles</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-clear" (click)="limpiarChat()" title="Limpiar chat">
+          <i class="fas fa-trash-alt"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-messages" #chatMessages>
+      <div *ngFor="let msg of mensajes; let i = index" 
+           class="message" 
+           [class.user]="msg.rol === 'usuario'" 
+           [class.assistant]="msg.rol === 'asistente'">
+        <div class="message-avatar">
+          <i *ngIf="msg.rol === 'asistente'" class="fas fa-robot"></i>
+          <i *ngIf="msg.rol === 'usuario'" class="fas fa-user"></i>
+        </div>
+        <div class="message-content">
+          <div class="message-text" [innerHTML]="formatearTexto(msg.contenido)"></div>
+          <div class="message-fuentes" *ngIf="msg.fuentes && msg.fuentes.length > 0">
+            <button class="btn-fuentes" (click)="mostrarFuentes(msg.fuentes)">
+              <i class="fas fa-book-open"></i> Ver fuentes ({{ msg.fuentes.length }})
+            </button>
+          </div>
+          <div class="message-time" *ngIf="msg.timestamp">
+            {{ msg.timestamp | date:'shortTime' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Thinking Animation -->
+      <div *ngIf="isThinking" class="message assistant thinking">
+        <div class="message-avatar">
+          <i class="fas fa-robot"></i>
+        </div>
+        <div class="message-content">
+          <div class="thinking-container">
+            <div class="thinking-animation">
+              <div class="loader">
+                <svg width="60" height="60" viewBox="0 0 100 100">
+                  <defs>
+                    <mask id="clipping">
+                      <polygon points="0,0 100,0 100,100 0,100" fill="black"></polygon>
+                      <polygon points="25,25 75,25 50,75" fill="white"></polygon>
+                    </mask>
+                  </defs>
+                  <g mask="url(#clipping)">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="url(#grad)" stroke-width="4">
+                      <animate attributeName="stroke-dasharray" from="0 300" to="300 0" dur="1.5s" repeatCount="indefinite"/>
+                    </circle>
+                  </g>
+                  <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#6366f1"/>
+                      <stop offset="50%" stop-color="#8b5cf6"/>
+                      <stop offset="100%" stop-color="#a855f7"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div class="thinking-text">
+                <span class="thinking-icon">{{ thinkingSteps[currentThinkingStep].icon || '🤔' }}</span>
+                <span class="thinking-message">{{ thinkingText }}</span>
+                <span class="thinking-dots">
+                  <span>.</span><span>.</span><span>.</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sugerencias Rápidas -->
+    <div class="suggestions-bar" *ngIf="mensajes.length <= 2 && !cargando && !isThinking">
+      <div class="suggestions-title">
+        <i class="fas fa-lightbulb"></i> ¿Qué te gustaría aprender hoy?
+      </div>
+      <div class="suggestions-grid">
+        <button *ngFor="let sug of sugerencias" class="suggestion-btn" (click)="usarSugerencia(sug)">
+          <span class="suggestion-icon">{{ sug.icon }}</span>
+          <span class="suggestion-text">{{ sug.text }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="chat-input">
+      <textarea 
+        [(ngModel)]="preguntaActual" 
+        (keydown.enter)="enviarMensaje(); $event.preventDefault()"
+        placeholder="Escribe tu pregunta... (Enter para enviar)"
+        rows="1"
+        [disabled]="cargando || isThinking"
+      ></textarea>
+      <button (click)="enviarMensaje()" [disabled]="!preguntaActual.trim() || cargando || isThinking">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </main>
+
+  <!-- Modal de Fuentes -->
+  <div class="modal" *ngIf="mostrandoFuentes" (click)="mostrandoFuentes = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="fas fa-book-open"></i> Documentos de referencia</h3>
+        <button class="close" (click)="mostrandoFuentes = false">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div *ngFor="let fuente of fuentesSeleccionadas" class="fuente-item">
+          <div class="fuente-titulo">
+            <i class="fas fa-file-alt"></i>
+            <strong>{{ fuente.titulo }}</strong>
+          </div>
+          <div class="fuente-detalle">
+            <span class="badge">📁 {{ fuente.fuente }}</span>
+            <span class="badge" *ngIf="fuente.similitud">📊 {{ (fuente.similitud * 100).toFixed(1) }}% relevante</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,42 +1,168 @@
 <div class="calendario-container">
+  <!-- Header Premium -->
   <div class="calendario-header">
     <div class="header-info">
-      <h1>
+      <div class="header-icon">
         <i class="fas fa-calendar-alt"></i>
-        Calendario Académico
-      </h1>
-      <p class="subtitulo">Organiza tus tareas, exámenes y actividades en un solo lugar</p>
+      </div>
+      <div>
+        <h1>Calendario Académico</h1>
+        <p class="subtitulo">Organiza tus tareas, exámenes y actividades en un solo lugar</p>
+      </div>
     </div>
     <div class="header-stats">
-      <div class="stat-badge">
+      <div class="stat-badge tarea" (click)="irATareas()">
         <i class="fas fa-tasks"></i>
-        <span>Tareas pendientes</span>
+        <div>
+          <span class="stat-number">{{ tareasCount }}</span>
+          <span class="stat-label">Tareas</span>
+        </div>
       </div>
-      <div class="stat-badge exam">
+      <div class="stat-badge examen" (click)="irAExamenes()">
         <i class="fas fa-calendar-check"></i>
-        <span>Próximos exámenes</span>
+        <div>
+          <span class="stat-number">{{ examenesCount }}</span>
+          <span class="stat-label">Exámenes</span>
+        </div>
+      </div>
+      <div class="stat-badge total">
+        <i class="fas fa-star"></i>
+        <div>
+          <span class="stat-number">{{ eventosMes }}</span>
+          <span class="stat-label">Eventos</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="calendario-wrapper">
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" *ngIf="isLoading">
+    <div class="loader-premium">
+      <div class="loader-ring"></div>
+      <div class="loader-ring"></div>
+      <div class="loader-ring"></div>
+      <span>Cargando calendario...</span>
+    </div>
+  </div>
+
+  <!-- Wrapper del calendario -->
+  <div class="calendario-wrapper" [class.loading]="isLoading">
     <full-calendar [options]="calendarOptions"></full-calendar>
   </div>
 
+  <!-- Footer con Leyenda -->
   <div class="calendario-footer">
     <div class="legend">
       <div class="legend-item">
-        <span class="legend-color tarea"></span>
+        <div class="legend-color tarea"></div>
         <span>Tareas</span>
+        <small>Haz clic para ver detalles</small>
       </div>
       <div class="legend-item">
-        <span class="legend-color examen"></span>
+        <div class="legend-color examen"></div>
         <span>Exámenes</span>
+        <small>Haz clic para ver detalles</small>
       </div>
-      <div class="legend-item">
+      <div class="legend-item interactivo">
         <i class="fas fa-plus-circle"></i>
-        <span>Haz clic en una fecha para crear evento</span>
+        <span>Selecciona una fecha</span>
+        <small>para crear un evento</small>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Creación Rápida -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-icon">
+        <i class="fas fa-calendar-plus"></i>
+      </div>
+      <div>
+        <h3>Crear nuevo evento</h3>
+        <p>{{ selectedDateStr }}</p>
+      </div>
+      <button class="modal-close" (click)="cerrarModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Selector de Tipo -->
+      <div class="tipo-selector">
+        <button class="tipo-btn" [class.active]="tipoEvento === 'tarea'" (click)="seleccionarTipo('tarea')">
+          <i class="fas fa-tasks"></i>
+          <span>Tarea</span>
+        </button>
+        <button class="tipo-btn" [class.active]="tipoEvento === 'examen'" (click)="seleccionarTipo('examen')">
+          <i class="fas fa-calendar-check"></i>
+          <span>Examen</span>
+        </button>
+      </div>
+
+      <!-- Formulario -->
+      <div class="form-group">
+        <label>
+          <i class="fas fa-heading"></i>
+          Título
+        </label>
+        <input 
+          type="text" 
+          class="form-control" 
+          [(ngModel)]="tituloRapido" 
+          placeholder="Ej: Entregar proyecto final"
+          [placeholder]="tipoEvento === 'tarea' ? 'Nombre de la tarea' : 'Materia del examen'"
+        >
+      </div>
+
+      <div class="form-group" *ngIf="tipoEvento === 'tarea'">
+        <label>
+          <i class="fas fa-book"></i>
+          Materia (opcional)
+        </label>
+        <select class="form-control" [(ngModel)]="materiaSeleccionada">
+          <option value="">Seleccionar materia</option>
+          <option *ngFor="let m of materiasDisponibles" [value]="m.id">
+            {{ m.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="tipoEvento === 'tarea'">
+        <label>
+          <i class="fas fa-flag"></i>
+          Prioridad
+        </label>
+        <div class="prioridad-selector">
+          <button class="prioridad-btn baja" [class.active]="prioridadRapida === 'baja'" (click)="prioridadRapida = 'baja'">
+            <i class="fas fa-flag"></i> Baja
+          </button>
+          <button class="prioridad-btn media" [class.active]="prioridadRapida === 'media'" (click)="prioridadRapida = 'media'">
+            <i class="fas fa-flag-checkered"></i> Media
+          </button>
+          <button class="prioridad-btn alta" [class.active]="prioridadRapida === 'alta'" (click)="prioridadRapida = 'alta'">
+            <i class="fas fa-flag"></i> Alta
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="tipoEvento === 'examen'">
+        <label>
+          <i class="fas fa-door-open"></i>
+          Aula (opcional)
+        </label>
+        <input type="text" class="form-control" placeholder="Ej: Aula 301">
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="cerrarModal()">
+        <i class="fas fa-times"></i> Cancelar
+      </button>
+      <button class="btn-create" (click)="crearEventoRapido()">
+        <i class="fas fa-check"></i> Crear {{ tipoEvento === 'tarea' ? 'Tarea' : 'Examen' }}
+      </button>
     </div>
   </div>
 </div>

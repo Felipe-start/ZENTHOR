@@ -1,20 +1,19 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
-import { RagChatComponent } from './rag-chat/rag-chat.component';
-import { DocumentosComponent } from './documentos/documentos.component';
+import { RagHubComponent } from './rag-hub/rag-hub.component';
 
 const routes: Routes = [
-  { path: '', component: RagChatComponent },
-  { path: 'documentos', component: DocumentosComponent }
+  { path: '', component: RagHubComponent }
 ];
 
 @NgModule({
-  declarations: [RagChatComponent, DocumentosComponent],
+  declarations: [RagHubComponent],
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     RouterModule.forChild(routes)
   ]
 })

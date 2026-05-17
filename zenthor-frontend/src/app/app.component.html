@@ -1,22 +1,24 @@
+
+
+ 
+
 <!-- Contenedor principal -->
-<div class="app-container">
-  <!-- Cuando NO está autenticado (páginas de auth) -->
+<div class="app-root">
+  <!-- Cuando NO está autenticado -->
   <ng-container *ngIf="!authService.isAuthenticated">
     <div class="auth-wrapper">
       <router-outlet></router-outlet>
     </div>
   </ng-container>
 
-  <!-- Cuando SÍ está autenticado (dashboard y demás) -->
+  <!-- Cuando SÍ está autenticado -->
   <ng-container *ngIf="authService.isAuthenticated">
     <app-navbar></app-navbar>
-    <div class="main-layout">
-      <main class="main-content">
-        <div class="content-wrapper">
-          <router-outlet></router-outlet>
-        </div>
-      </main>
-    </div>
+    <main class="main-content">
+      <div class="content-wrapper">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
     <app-footer></app-footer>
   </ng-container>
 </div>
