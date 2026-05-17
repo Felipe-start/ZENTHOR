@@ -1,11 +1,13 @@
 const axios = require('axios');
 const { supabaseAdmin } = require('../config/supabase');
 
-const HF_API_URL = 'https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2';
+// ✅ URL CORRECTA de Hugging Face
+const HF_API_URL = 'https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2';
 
 const generarEmbedding = async (texto) => {
   try {
-    console.log('🔄 Generando embedding...');
+    console.log('🔄 Generando embedding para texto de longitud:', texto.length);
+    
     const response = await axios.post(
       HF_API_URL,
       {
@@ -17,13 +19,14 @@ const generarEmbedding = async (texto) => {
           'Authorization': `Bearer ${process.env.HF_TOKEN}`,
           'Content-Type': 'application/json'
         },
-        timeout: 30000
+        timeout: 60000
       }
     );
-    console.log('✅ Embedding generado');
+    
+    console.log('✅ Embedding generado exitosamente');
     return response.data;
   } catch (error) {
-    console.error('❌ Error generando embedding:', error.message);
+    console.error('❌ Error generando embedding:', error.response?.status, error.response?.data || error.message);
     return null;
   }
 };
@@ -41,10 +44,12 @@ const vectorizarDocumento = async (userId, titulo, contenido, fuente, metadata =
       .insert({
         usuario_id: userId,
         titulo: titulo,
-        fuente: fuente,
         contenido: contenido,
+        fuente: fuente,
         embedding: embedding,
-        metadata: metadata
+        metadata: metadata,
+        creado_en: new Date(),
+        actualizado_en: new Date()
       })
       .select()
       .single();
@@ -53,7 +58,7 @@ const vectorizarDocumento = async (userId, titulo, contenido, fuente, metadata =
     console.log(`✅ Documento vectorizado: ${titulo}`);
     return data;
   } catch (error) {
-    console.error('❌ Error vectorizando:', error);
+    console.error('❌ Error vectorizando:', error.message);
     throw error;
   }
 };
