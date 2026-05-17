@@ -1,18 +1,19 @@
 /* ============================================
-   DASHBOARD STYLES - ZENTHOR
-   Version: 3.0 - Fully Responsive & Production Ready
+   DASHBOARD STYLES - ZENTHOR ENTERPRISE
+   Version: 3.0 - Production Ready
    ============================================ */
 
-/* CSS Variables */
 :host {
   --primary-500: #6366f1;
   --primary-600: #4f46e5;
   --secondary-500: #8b5cf6;
   --secondary-600: #7c3aed;
-  --accent-500: #a855f7;
   --success-500: #10b981;
+  --success-600: #059669;
   --warning-500: #f59e0b;
+  --warning-600: #d97706;
   --danger-500: #ef4444;
+  --danger-600: #dc2626;
   
   --gray-50: #f9fafb;
   --gray-100: #f3f4f6;
@@ -25,11 +26,11 @@
   --gray-800: #1f2937;
   --gray-900: #111827;
   
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
   
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
@@ -49,7 +50,7 @@
 }
 
 /* ============================================
-   HERO SECTION (Fully Responsive)
+   HERO SECTION
    ============================================ */
 .hero-section {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
@@ -65,7 +66,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+  background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
   animation: pulseBg 4s ease-in-out infinite;
   pointer-events: none;
 }
@@ -95,6 +96,7 @@
   flex-shrink: 0;
 }
 
+/* Logo Real */
 .hero-logo {
   width: clamp(3rem, 12vw, 5rem);
   height: clamp(3rem, 12vw, 5rem);
@@ -183,7 +185,7 @@
 }
 
 /* ============================================
-   STATS CARDS (Responsive Grid)
+   STATS CARDS
    ============================================ */
 .stats-grid {
   display: grid;
@@ -270,8 +272,23 @@
   font-weight: 500;
 }
 
+.skeleton-text {
+  display: inline-block;
+  background: linear-gradient(90deg, #e5e7eb 0%, #f3f4f6 50%, #e5e7eb 100%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  color: transparent;
+  min-width: 40px;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* ============================================
-   DASHBOARD GRID (Responsive)
+   DASHBOARD GRID
    ============================================ */
 .dashboard-grid {
   display: grid;
@@ -513,6 +530,10 @@
   margin: 0 auto 0.75rem;
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Subject Items */
 .subject-item {
   display: flex;
@@ -588,11 +609,6 @@
 /* ============================================
    ANIMATIONS
    ============================================ */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
@@ -611,14 +627,6 @@
 @keyframes scaleIn {
   from { opacity: 0; transform: scale(0.9); }
   to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
 }
 
 .animate-slide-up {
@@ -655,24 +663,29 @@
 /* ============================================
    RESPONSIVE BREAKPOINTS
    ============================================ */
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .hero-content {
     text-align: center;
     justify-content: center;
   }
-  
   .hero-left {
     text-align: center;
   }
-  
   .frase-motivacional {
     justify-content: center;
   }
-  
   .stats-grid {
     gap: 0.75rem;
   }
-  
   .dashboard-grid {
     gap: 0.75rem;
   }
@@ -683,12 +696,10 @@
     flex-direction: column;
     gap: 0.375rem;
   }
-  
   .task-item, .exam-item {
     flex-direction: column;
     align-items: flex-start;
   }
-  
   .complete-btn, .details-btn {
     align-self: flex-end;
   }
@@ -698,24 +709,21 @@
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
   .card-header {
     flex-direction: column;
     text-align: center;
   }
-  
   .task-title, .exam-title {
     flex-direction: column;
     align-items: flex-start;
   }
 }
 
-/* Touch-friendly adjustments */
+/* Touch-friendly */
 @media (hover: none) and (pointer: coarse) {
   .stat-card:active {
     transform: scale(0.98);
   }
-  
   .complete-btn, .details-btn {
     min-width: 44px;
     min-height: 44px;

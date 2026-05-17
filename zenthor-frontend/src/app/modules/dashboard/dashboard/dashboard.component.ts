@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
-import { Chart, ChartConfiguration, ChartItem } from 'chart.js/auto';
+import { Chart, ChartConfiguration } from 'chart.js/auto';
 import { TareasService } from '../../../core/services/tareas.service';
 import { ExamenesService } from '../../../core/services/examenes.service';
 import { MateriasService } from '../../../core/services/materias.service';
@@ -25,7 +25,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   tareasCompletadas: number = 0;
   progresoAcademico: number = 0;
   
-  // Nuevas estadísticas detalladas
+  // Estadísticas detalladas
   tareasAtrasadas: number = 0;
   tareasPorCaducar: number = 0;
   tareasHoy: number = 0;
@@ -120,28 +120,23 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         const manana = new Date(hoy);
         manana.setDate(manana.getDate() + 1);
         
-        // Filtrar tareas pendientes
         const tareasPendientes = tareas.filter(t => t.estado === 'pendiente');
         
-        // Tareas atrasadas (fecha de entrega pasada)
         this.tareasAtrasadasList = tareasPendientes.filter(t => new Date(t.fecha_entrega) < ahora);
         this.tareasAtrasadas = this.tareasAtrasadasList.length;
         
-        // Tareas para hoy
         this.tareasHoyList = tareasPendientes.filter(t => {
           const fechaEntrega = new Date(t.fecha_entrega);
           return fechaEntrega >= hoy && fechaEntrega < manana;
         });
         this.tareasHoy = this.tareasHoyList.length;
         
-        // Tareas por caducar (próximas 24 horas)
         const limite24h = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
         this.tareasPorCaducar = tareasPendientes.filter(t => {
           const fechaEntrega = new Date(t.fecha_entrega);
           return fechaEntrega > ahora && fechaEntrega <= limite24h;
         }).length;
         
-        // Tareas próximas (próximos 7 días, excluyendo hoy y atrasadas)
         const proximas7dias = tareasPendientes.filter(t => {
           const fechaEntrega = new Date(t.fecha_entrega);
           const diffDias = (fechaEntrega.getTime() - ahora.getTime()) / (1000 * 60 * 60 * 24);
@@ -164,8 +159,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.examenesService.getExamenesProximos().subscribe({
       next: (examenes: ExamenWithMateria[]) => {
         const ahora = new Date();
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
         const dentro7dias = new Date(ahora);
         dentro7dias.setDate(dentro7dias.getDate() + 7);
         
@@ -179,8 +172,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.cargandoExamenes = false;
       },
       error: (error: any) => {
-        console.error('Error cargando exámenes próximos:', error);
-        this.toastr.error('Error al cargar los exámenes próximos', 'Error');
+        console.error('Error cargando exámenes:', error);
+        this.toastr.error('Error al cargar los exámenes', 'Error');
         this.cargandoExamenes = false;
       }
     });
@@ -261,10 +254,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Datos reales basados en estadísticas actuales
     const dias = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     
-    // Calcular datos de la semana (simulados pero basados en tendencia)
     const tasaCompletado = this.tareasCompletadas / (this.tareasPendientes + this.tareasCompletadas) || 0.5;
     const tareasCompletadasData = [
       Math.round(4 * tasaCompletado),
@@ -278,14 +269,14 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     
     const horasEstudioData = [2.5, 3, 3.5, 4, 5, 3.5, 2];
     const productividadData = [
-      68 + Math.round(this.progresoAcademico * 0.2),
-      72 + Math.round(this.progresoAcademico * 0.2),
-      78 + Math.round(this.progresoAcademico * 0.2),
-      75 + Math.round(this.progresoAcademico * 0.2),
-      85 + Math.round(this.progresoAcademico * 0.2),
-      65 + Math.round(this.progresoAcademico * 0.2),
-      58 + Math.round(this.progresoAcademico * 0.2)
-    ].map(v => Math.min(v, 100));
+      Math.min(68 + Math.round(this.progresoAcademico * 0.2), 100),
+      Math.min(72 + Math.round(this.progresoAcademico * 0.2), 100),
+      Math.min(78 + Math.round(this.progresoAcademico * 0.2), 100),
+      Math.min(75 + Math.round(this.progresoAcademico * 0.2), 100),
+      Math.min(85 + Math.round(this.progresoAcademico * 0.2), 100),
+      Math.min(65 + Math.round(this.progresoAcademico * 0.2), 100),
+      Math.min(58 + Math.round(this.progresoAcademico * 0.2), 100)
+    ];
 
     const config: ChartConfiguration = {
       type: 'line',
@@ -304,8 +295,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             pointBorderColor: '#ffffff',
             pointBorderWidth: 2,
             pointRadius: 5,
-            pointHoverRadius: 8,
-            pointStyle: 'circle'
+            pointHoverRadius: 8
           },
           {
             label: '📚 Horas de estudio',
@@ -319,8 +309,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             pointBorderColor: '#ffffff',
             pointBorderWidth: 2,
             pointRadius: 5,
-            pointHoverRadius: 8,
-            pointStyle: 'circle'
+            pointHoverRadius: 8
           },
           {
             label: '🎯 Productividad (%)',
@@ -335,7 +324,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             pointBorderWidth: 2,
             pointRadius: 5,
             pointHoverRadius: 8,
-            pointStyle: 'circle',
             yAxisID: 'y1'
           }
         ]
@@ -343,23 +331,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       options: {
         responsive: true,
         maintainAspectRatio: true,
-        interaction: {
-          mode: 'index',
-          intersect: false,
-        },
+        interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: {
             position: 'top',
-            labels: {
-              usePointStyle: true,
-              boxWidth: 10,
-              padding: 15,
-              font: {
-                family: "'Inter', sans-serif",
-                size: 11,
-                weight: '500'
-              }
-            }
+            labels: { usePointStyle: true, boxWidth: 10, padding: 15, font: { size: 11, weight: '500' } }
           },
           tooltip: {
             backgroundColor: 'rgba(0, 0, 0, 0.85)',
@@ -367,66 +343,21 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
             bodyColor: '#e5e7eb',
             padding: 12,
             cornerRadius: 8,
-            displayColors: true,
             callbacks: {
-              label: function(context: any) {
+              label: (context: any) => {
                 let label = context.dataset.label || '';
                 let value = context.parsed.y;
-                if (context.dataset.label?.includes('Productividad')) {
-                  return `${label}: ${value}%`;
-                }
-                if (context.dataset.label?.includes('Horas')) {
-                  return `${label}: ${value} hrs`;
-                }
+                if (context.dataset.label?.includes('Productividad')) return `${label}: ${value}%`;
+                if (context.dataset.label?.includes('Horas')) return `${label}: ${value} hrs`;
                 return `${label}: ${value}`;
               }
             }
           }
         },
         scales: {
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: '#f3f4f6'
-            },
-            title: {
-              display: true,
-              text: 'Tareas / Horas',
-              color: '#6b7280',
-              font: {
-                size: 11,
-                weight: '500'
-              }
-            }
-          },
-          y1: {
-            position: 'right',
-            beginAtZero: true,
-            max: 100,
-            grid: {
-              drawOnChartArea: false
-            },
-            title: {
-              display: true,
-              text: 'Productividad (%)',
-              color: '#6b7280',
-              font: {
-                size: 11,
-                weight: '500'
-              }
-            }
-          },
-          x: {
-            grid: {
-              display: false
-            },
-            ticks: {
-              font: {
-                size: 11,
-                weight: '500'
-              }
-            }
-          }
+          y: { beginAtZero: true, grid: { color: '#f3f4f6' }, title: { display: true, text: 'Tareas / Horas', color: '#6b7280', font: { size: 11 } } },
+          y1: { position: 'right', beginAtZero: true, max: 100, grid: { drawOnChartArea: false }, title: { display: true, text: 'Productividad (%)', color: '#6b7280', font: { size: 11 } } },
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } }
         }
       }
     };
@@ -435,39 +366,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getPrioridadTexto(prioridad: string): string {
-    const prioridades: { [key: string]: string } = {
-      baja: 'Baja',
-      media: 'Media',
-      alta: 'Alta'
-    };
+    const prioridades: { [key: string]: string } = { baja: 'Baja', media: 'Media', alta: 'Alta' };
     return prioridades[prioridad] || prioridad;
-  }
-
-  getColorPrioridad(prioridad: string): string {
-    const colores: { [key: string]: string } = {
-      baja: '#10b981',
-      media: '#f59e0b',
-      alta: '#ef4444'
-    };
-    return colores[prioridad] || '#6b7280';
-  }
-
-  getEstadoTarea(fechaEntrega: string): string {
-    const ahora = new Date();
-    const fecha = new Date(fechaEntrega);
-    if (fecha < ahora) return 'atrasada';
-    const horas = (fecha.getTime() - ahora.getTime()) / (1000 * 60 * 60);
-    if (horas <= 24) return 'por_caducar';
-    return 'pendiente';
-  }
-
-  getEstadoTexto(estado: string): string {
-    const textos: { [key: string]: string } = {
-      atrasada: 'Atrasada ⚠️',
-      por_caducar: 'Por caducar 🔥',
-      pendiente: 'Pendiente 📌'
-    };
-    return textos[estado] || estado;
   }
 
   completarTarea(id: number): void {
@@ -477,55 +377,31 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.cargarEstadisticasCompletas();
         this.toastr.success('¡Tarea completada! 🎉 Sigue así', 'Éxito');
       },
-      error: (error: any) => {
-        console.error('Error completando tarea:', error);
-        this.toastr.error('Error al completar la tarea', 'Error');
-      }
+      error: () => this.toastr.error('Error al completar la tarea', 'Error')
     });
   }
 
   verDetallesExamen(examen: ExamenWithMateria): void {
     const fechaFormateada = new Date(examen.fecha_examen).toLocaleDateString('es-MX', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
-    
     this.toastr.info(
-      `<div style="text-align: left;">
+      `<div style="text-align:left;">
         <strong>📚 ${examen.materia_nombre}</strong><br/>
         📅 Fecha: ${fechaFormateada}<br/>
         📍 Aula: ${examen.aula || 'No especificada'}<br/>
         📖 Temas: ${examen.temas || 'No especificados'}
       </div>`,
       'Detalles del Examen',
-      { 
-        timeOut: 8000, 
-        enableHtml: true,
-        positionClass: 'toast-top-right'
-      }
+      { timeOut: 8000, enableHtml: true, positionClass: 'toast-top-right' }
     );
   }
 
-  irATareas(): void {
-    this.router.navigate(['/tareas']);
-  }
-
-  irAExamenes(): void {
-    this.router.navigate(['/examenes']);
-  }
-
-  irAMaterias(): void {
-    this.router.navigate(['/materias']);
-  }
-
-  irACalendario(): void {
-    this.router.navigate(['/calendario']);
-  }
+  irATareas(): void { this.router.navigate(['/tareas']); }
+  irAExamenes(): void { this.router.navigate(['/examenes']); }
+  irAMaterias(): void { this.router.navigate(['/materias']); }
 
   handleImageError(event: any): void {
-    event.target.src = 'https://via.placeholder.com/80x80?text=Z';
+    event.target.src = 'https://via.placeholder.com/80x80?text=ZENTHOR';
   }
 }

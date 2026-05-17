@@ -1,10 +1,15 @@
 <div class="dashboard">
-  <!-- Hero Section con Logo y Frase Motivacional -->
+  <!-- Hero Section con Logo Real -->
   <div class="hero-section">
     <div class="hero-bg-animation"></div>
     <div class="hero-content">
       <div class="hero-left">
-        
+        <!-- LOGO REAL - Imagen, no icono -->
+        <img 
+          src="assets/images/ LOGO Z.jpg" 
+          alt="ZENTHOR" 
+          class="hero-logo"
+          (error)="handleImageError($event)">
         <h1 class="animate-slide-up">
           ¡Bienvenido de vuelta, {{ userName }}!
         </h1>
@@ -19,13 +24,13 @@
       <div class="hero-right animate-scale" style="animation-delay: 0.15s">
         <div class="progress-circle">
           <svg viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="45" class="progress-bg"/>
+            <circle cx="50" cy="50" r="45" class="progress-bg"></circle>
             <circle 
               cx="50" cy="50" r="45" 
               class="progress-fill" 
               [style.strokeDasharray]="'calc(2 * 3.14159 * 45)'"
-              [style.strokeDashoffset]="'calc(2 * 3.14159 * 45 * (1 - ' + progresoAcademico + ' / 100))'"
-            />
+              [style.strokeDashoffset]="'calc(2 * 3.14159 * 45 * (1 - ' + progresoAcademico + ' / 100))'">
+            </circle>
             <text x="50" y="55" text-anchor="middle" class="progress-text">{{ progresoAcademico }}%</text>
           </svg>
           <p>Progreso Total</p>
@@ -37,89 +42,60 @@
   <!-- Stats Cards -->
   <div class="stats-grid stagger-children">
     <div class="stat-card" (click)="irATareas()">
-      <div class="stat-icon">
-        <i class="fas fa-tasks"></i>
-      </div>
+      <div class="stat-icon"><i class="fas fa-tasks"></i></div>
       <div class="stat-info">
-        <h3>
-          <span *ngIf="!cargandoEstadisticas">{{ tareasPendientes }}</span>
-          <span *ngIf="cargandoEstadisticas" class="skeleton-text">--</span>
-        </h3>
+        <h3><span *ngIf="!cargandoEstadisticas">{{ tareasPendientes }}</span><span *ngIf="cargandoEstadisticas" class="skeleton-text">--</span></h3>
         <p>Tareas Pendientes</p>
       </div>
       <div class="stat-hover-effect"></div>
     </div>
     
     <div class="stat-card" (click)="irAExamenes()">
-      <div class="stat-icon">
-        <i class="fas fa-calendar-alt"></i>
-      </div>
+      <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
       <div class="stat-info">
-        <h3>
-          <span *ngIf="!cargandoExamenes">{{ examenesProximosCount }}</span>
-          <span *ngIf="cargandoExamenes" class="skeleton-text">--</span>
-        </h3>
+        <h3><span *ngIf="!cargandoExamenes">{{ examenesProximosCount }}</span><span *ngIf="cargandoExamenes" class="skeleton-text">--</span></h3>
         <p>Exámenes Próximos</p>
       </div>
       <div class="stat-hover-effect"></div>
     </div>
     
     <div class="stat-card" (click)="irAMaterias()">
-      <div class="stat-icon">
-        <i class="fas fa-book"></i>
-      </div>
+      <div class="stat-icon"><i class="fas fa-book"></i></div>
       <div class="stat-info">
-        <h3>
-          <span *ngIf="!cargandoMaterias">{{ materiasActivas }}</span>
-          <span *ngIf="cargandoMaterias" class="skeleton-text">--</span>
-        </h3>
+        <h3><span *ngIf="!cargandoMaterias">{{ materiasActivas }}</span><span *ngIf="cargandoMaterias" class="skeleton-text">--</span></h3>
         <p>Materias Activas</p>
       </div>
       <div class="stat-hover-effect"></div>
     </div>
     
     <div class="stat-card">
-      <div class="stat-icon">
-        <i class="fas fa-check-circle"></i>
-      </div>
+      <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
       <div class="stat-info">
-        <h3>
-          <span *ngIf="!cargandoEstadisticas">{{ tareasCompletadas }}</span>
-          <span *ngIf="cargandoEstadisticas" class="skeleton-text">--</span>
-        </h3>
+        <h3><span *ngIf="!cargandoEstadisticas">{{ tareasCompletadas }}</span><span *ngIf="cargandoEstadisticas" class="skeleton-text">--</span></h3>
         <p>Tareas Completadas</p>
       </div>
       <div class="stat-hover-effect"></div>
     </div>
   </div>
 
+  <!-- Dashboard Grid -->
   <div class="dashboard-grid">
     <!-- Tareas Próximas -->
     <div class="card animate-slide-left">
       <div class="card-header">
-        <h3>
-          <i class="fas fa-tasks"></i>
-          Tareas Próximas
-        </h3>
-        <a routerLink="/tareas" class="view-all">
-          Ver todas <i class="fas fa-arrow-right"></i>
-        </a>
+        <h3><i class="fas fa-tasks"></i> Tareas Próximas</h3>
+        <a routerLink="/tareas" class="view-all">Ver todas <i class="fas fa-arrow-right"></i></a>
       </div>
       <div class="card-body">
-        <!-- Estado de carga -->
         <div *ngIf="cargandoTareas" class="loading-state">
           <div class="spinner"></div>
           <p>Cargando tus tareas...</p>
         </div>
-        
-        <!-- Estado vacío -->
         <div *ngIf="!cargandoTareas && tareasProximas.length === 0" class="empty-state">
           <i class="fas fa-check-circle"></i>
           <h4>¡No tienes tareas pendientes!</h4>
           <p>Disfruta de tu tiempo libre o adelanta trabajo 📚</p>
         </div>
-        
-        <!-- Lista de tareas -->
         <div *ngFor="let tarea of tareasProximas" class="task-item">
           <div class="task-info">
             <div class="task-title">
@@ -127,27 +103,12 @@
               <strong>{{ tarea.titulo }}</strong>
             </div>
             <div class="task-meta">
-              <span>
-                <i class="fas fa-book"></i>
-                {{ tarea.materia_nombre }}
-              </span>
-              <span class="task-date">
-                <i class="far fa-calendar"></i>
-                {{ tarea.fecha_entrega | date:'dd/MM/yyyy' }}
-              </span>
-              <span class="task-priority" [class]="tarea.prioridad">
-                <i class="fas fa-flag"></i>
-                {{ getPrioridadTexto(tarea.prioridad) }}
-              </span>
+              <span><i class="fas fa-book"></i> {{ tarea.materia_nombre }}</span>
+              <span class="task-date"><i class="far fa-calendar"></i> {{ tarea.fecha_entrega | date:'dd/MM/yyyy' }}</span>
+              <span class="task-priority" [class]="tarea.prioridad"><i class="fas fa-flag"></i> {{ getPrioridadTexto(tarea.prioridad) }}</span>
             </div>
           </div>
-          <button 
-            class="complete-btn" 
-            (click)="completarTarea(tarea.id)" 
-            title="Marcar como completada"
-          >
-            <i class="fas fa-check"></i>
-          </button>
+          <button class="complete-btn" (click)="completarTarea(tarea.id)" title="Marcar como completada"><i class="fas fa-check"></i></button>
         </div>
       </div>
     </div>
@@ -155,29 +116,19 @@
     <!-- Exámenes Próximos -->
     <div class="card animate-slide-right">
       <div class="card-header">
-        <h3>
-          <i class="fas fa-calendar-alt"></i>
-          Próximos Exámenes
-        </h3>
-        <a routerLink="/examenes" class="view-all">
-          Ver todas <i class="fas fa-arrow-right"></i>
-        </a>
+        <h3><i class="fas fa-calendar-alt"></i> Próximos Exámenes</h3>
+        <a routerLink="/examenes" class="view-all">Ver todas <i class="fas fa-arrow-right"></i></a>
       </div>
       <div class="card-body">
-        <!-- Estado de carga -->
         <div *ngIf="cargandoExamenes" class="loading-state">
           <div class="spinner"></div>
           <p>Cargando tus exámenes...</p>
         </div>
-        
-        <!-- Estado vacío -->
         <div *ngIf="!cargandoExamenes && examenesProximosList.length === 0" class="empty-state">
           <i class="fas fa-smile-wink"></i>
           <h4>¡No hay exámenes próximos!</h4>
           <p>Aprovecha para repasar con calma 📖</p>
         </div>
-        
-        <!-- Lista de exámenes -->
         <div *ngFor="let examen of examenesProximosList" class="exam-item">
           <div class="exam-info">
             <div class="exam-title">
@@ -185,23 +136,11 @@
               <strong>{{ examen.materia_nombre }}</strong>
             </div>
             <div class="exam-meta">
-              <span>
-                <i class="fas fa-door-open"></i>
-                {{ examen.aula ? 'Aula ' + examen.aula : 'Sin aula asignada' }}
-              </span>
-              <span class="exam-date">
-                <i class="far fa-clock"></i>
-                {{ examen.fecha_examen | date:'dd/MM/yyyy' }}
-              </span>
+              <span><i class="fas fa-door-open"></i> {{ examen.aula ? 'Aula ' + examen.aula : 'Sin aula asignada' }}</span>
+              <span class="exam-date"><i class="far fa-clock"></i> {{ examen.fecha_examen | date:'dd/MM/yyyy' }}</span>
             </div>
           </div>
-          <button 
-            class="details-btn" 
-            (click)="verDetallesExamen(examen)" 
-            title="Ver detalles"
-          >
-            <i class="fas fa-info-circle"></i>
-          </button>
+          <button class="details-btn" (click)="verDetallesExamen(examen)" title="Ver detalles"><i class="fas fa-info-circle"></i></button>
         </div>
       </div>
     </div>
@@ -209,10 +148,7 @@
     <!-- Gráfico de Progreso -->
     <div class="card chart-card animate-scale">
       <div class="card-header">
-        <h3>
-          <i class="fas fa-chart-line"></i>
-          Progreso Académico
-        </h3>
+        <h3><i class="fas fa-chart-line"></i> Progreso Académico</h3>
         <span class="chart-subtitle">Últimos 7 días</span>
       </div>
       <div class="card-body chart-container">
@@ -223,45 +159,28 @@
     <!-- Materias con tareas pendientes -->
     <div class="card animate-slide-up">
       <div class="card-header">
-        <h3>
-          <i class="fas fa-book"></i>
-          Materias con tareas pendientes
-        </h3>
-        <a routerLink="/materias" class="view-all">
-          Gestionar <i class="fas fa-arrow-right"></i>
-        </a>
+        <h3><i class="fas fa-book"></i> Materias con tareas pendientes</h3>
+        <a routerLink="/materias" class="view-all">Gestionar <i class="fas fa-arrow-right"></i></a>
       </div>
       <div class="card-body">
-        <!-- Estado de carga -->
         <div *ngIf="cargandoMaterias" class="loading-state">
           <div class="spinner"></div>
           <p>Cargando tus materias...</p>
         </div>
-        
-        <!-- Estado vacío -->
         <div *ngIf="!cargandoMaterias && materiasConTareas.length === 0" class="empty-state">
           <i class="fas fa-trophy"></i>
           <h4>¡Todas tus materias están al día!</h4>
           <p>Excelente trabajo, sigue así 🏆</p>
         </div>
-        
-        <!-- Lista de materias -->
         <div *ngFor="let materia of materiasConTareas" class="subject-item">
           <div class="subject-info">
             <span class="subject-color" [style.backgroundColor]="materia.color || '#6366f1'"></span>
             <div class="subject-details">
               <strong>{{ materia.nombre }}</strong>
-              <span>
-                <i class="fas fa-chalkboard-user"></i>
-                {{ materia.profesor || 'Sin profesor asignado' }}
-              </span>
+              <span><i class="fas fa-chalkboard-user"></i> {{ materia.profesor || 'Sin profesor asignado' }}</span>
             </div>
           </div>
-          <div class="task-count">
-            <span class="badge">
-              {{ materia.tareas_pendientes }} tarea(s)
-            </span>
-          </div>
+          <div class="task-count"><span class="badge">{{ materia.tareas_pendientes }} tarea(s)</span></div>
         </div>
       </div>
     </div>

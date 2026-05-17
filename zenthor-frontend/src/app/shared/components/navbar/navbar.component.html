@@ -1,1 +1,181 @@
-<p>navbar works!</p>
+<nav class="navbar" [class.scrolled]="isScrolled" [class.menu-open]="mobileMenuOpen">
+  <!-- Logo con imagen real -->
+  <div class="navbar-brand" routerLink="/dashboard">
+    <div class="logo-img-container">
+          <img src="assets/images/ LOGO Z.jpg" alt="ZENTHOR" class="footer-logo" (error)="handleImageError($event)">
+    </div>
+    <span class="brand-name">ZENTHOR</span>
+    <span class="brand-badge">Enterprise</span>
+  </div>
+
+  <!-- Desktop Navigation -->
+  <div class="navbar-links desktop-menu">
+    <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+      <i class="fas fa-chart-line"></i>
+      <span>Dashboard</span>
+    </a>
+    <a routerLink="/materias" routerLinkActive="active" class="nav-link">
+      <i class="fas fa-book"></i>
+      <span>Materias</span>
+    </a>
+    <a routerLink="/tareas" routerLinkActive="active" class="nav-link">
+      <i class="fas fa-tasks"></i>
+      <span>Tareas</span>
+    </a>
+    <a routerLink="/examenes" routerLinkActive="active" class="nav-link">
+      <i class="fas fa-calendar-alt"></i>
+      <span>Exámenes</span>
+    </a>
+    <a routerLink="/calendario" routerLinkActive="active" class="nav-link">
+      <i class="fas fa-calendar-week"></i>
+      <span>Calendario</span>
+    </a>
+
+    <!-- Dropdown IA -->
+    <div class="dropdown" (mouseenter)="openDropdown('ia')" (mouseleave)="closeDropdown('ia')">
+      <a class="nav-link dropdown-toggle">
+        <i class="fas fa-robot"></i>
+        <span>Inteligencia IA</span>
+        <i class="fas fa-chevron-down"></i>
+      </a>
+      <div class="dropdown-menu" [class.show]="activeDropdown === 'ia'">
+        <a routerLink="/chat-ia" class="dropdown-item">
+          <i class="fas fa-comment-dots"></i>
+          <div>
+            <strong>Chat IA</strong>
+            <small>Resuelve tus dudas al instante</small>
+          </div>
+        </a>
+        <a routerLink="/documentos" class="dropdown-item">
+          <i class="fas fa-file-alt"></i>
+          <div>
+            <strong>Documentos IA</strong>
+            <small>Sube y vectoriza tus apuntes</small>
+          </div>
+        </a>
+        <a routerLink="/conexiones" class="dropdown-item">
+          <i class="fas fa-plug"></i>
+          <div>
+            <strong>Conexiones</strong>
+            <small>Google, Notion, Moodle</small>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <a routerLink="/configuracion" routerLinkActive="active" class="nav-link">
+      <i class="fas fa-cog"></i>
+      <span>Configuración</span>
+    </a>
+  </div>
+
+  <!-- Right Section -->
+  <div class="navbar-right">
+    <!-- Notificaciones -->
+    <div class="notification-btn" (click)="toggleNotifications()">
+      <i class="fas fa-bell"></i>
+      <span class="badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
+    </div>
+
+    <!-- User Menu -->
+    <div class="user-menu" (click)="toggleUserMenu()">
+      <div class="user-avatar">
+        {{ getUserInitials() }}
+      </div>
+      <span class="user-name">{{ currentUser?.nombre_completo?.split(' ')[0] || 'Usuario' }}</span>
+      <i class="fas fa-chevron-down" [class.rotated]="userMenuOpen"></i>
+    </div>
+
+    <!-- Dropdown User -->
+    <div class="dropdown-user" [class.show]="userMenuOpen">
+      <div class="user-header">
+        <div class="user-avatar-lg">{{ getUserInitials() }}</div>
+        <div class="user-info">
+          <h4>{{ currentUser?.nombre_completo || 'Usuario' }}</h4>
+          <p>{{ currentUser?.email || 'usuario@zenthor.com' }}</p>
+        </div>
+      </div>
+      <div class="dropdown-divider"></div>
+      <a routerLink="/perfil" class="dropdown-item" (click)="closeMenus()">
+        <i class="fas fa-user-circle"></i> Mi Perfil
+      </a>
+      <a routerLink="/configuracion" class="dropdown-item" (click)="closeMenus()">
+        <i class="fas fa-cog"></i> Configuración
+      </a>
+      <a routerLink="/notificaciones" class="dropdown-item" (click)="closeMenus()">
+        <i class="fas fa-bell"></i> Notificaciones
+      </a>
+      <div class="dropdown-divider"></div>
+      <button (click)="logout()" class="dropdown-item logout">
+        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+      </button>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
+      <i class="fas" [class.fa-bars]="!mobileMenuOpen" [class.fa-times]="mobileMenuOpen"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-overlay" *ngIf="mobileMenuOpen" (click)="closeMobileMenu()"></div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" [class.open]="mobileMenuOpen">
+    <div class="mobile-user-section">
+      <div class="mobile-user-avatar">{{ getUserInitials() }}</div>
+      <div class="mobile-user-info">
+        <h3>{{ currentUser?.nombre_completo || 'Usuario' }}</h3>
+        <p>{{ currentUser?.email || 'usuario@zenthor.com' }}</p>
+      </div>
+    </div>
+
+    <div class="mobile-nav-items">
+      <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </a>
+      <a routerLink="/materias" routerLinkActive="active" (click)="closeMobileMenu()">
+        <i class="fas fa-book"></i> Materias
+      </a>
+      <a routerLink="/tareas" routerLinkActive="active" (click)="closeMobileMenu()">
+        <i class="fas fa-tasks"></i> Tareas
+      </a>
+      <a routerLink="/examenes" routerLinkActive="active" (click)="closeMobileMenu()">
+        <i class="fas fa-calendar-alt"></i> Exámenes
+      </a>
+      <a routerLink="/calendario" routerLinkActive="active" (click)="closeMobileMenu()">
+        <i class="fas fa-calendar-week"></i> Calendario
+      </a>
+
+      <div class="mobile-divider">Inteligencia IA</div>
+
+      <a routerLink="/chat-ia" routerLinkActive="active" (click)="closeMobileMenu()">
+        <i class="fas fa-robot"></i> Chat IA
+      </a>
+      <a routerLink="/documentos" routerLinkActive="active" (click)="closeMobileMenu()">
+        <i class="fas fa-file-alt"></i> Documentos IA
+      </a>
+      <a routerLink="/conexiones" routerLinkActive="active" (click)="closeMobileMenu()">
+        <i class="fas fa-plug"></i> Conexiones
+      </a>
+
+      <div class="mobile-divider"></div>
+
+      <a routerLink="/configuracion" routerLinkActive="active" (click)="closeMobileMenu()">
+        <i class="fas fa-cog"></i> Configuración
+      </a>
+      <a routerLink="/notificaciones" routerLinkActive="active" (click)="closeMobileMenu()">
+        <i class="fas fa-bell"></i> Notificaciones
+      </a>
+    </div>
+
+    <button class="mobile-logout" (click)="logout()">
+      <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+    </button>
+  </div>
+</nav>
+
+<!-- Main Content Wrapper -->
+<div class="content-wrapper">
+  <router-outlet></router-outlet>
+</div>
